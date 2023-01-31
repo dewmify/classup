@@ -8,7 +8,6 @@ from keras.models import load_model
 from cvzone.HandTrackingModule import HandDetector
 
 video = cv2.VideoCapture(0)
-detector = HandDetector(detectionCon=0.8, maxHands=2)
 
 model = load_model("HandGestureModel.h5")
 
@@ -19,22 +18,26 @@ while True:
 
     img = img.resize((128,128))
     img_array = np.array(img)
-    
+        
     img_array = img_array.reshape(1,128,128,3)
 
     prediction = model.predict(img_array)
     print(prediction)
-    
+        
     if(prediction[0][0] == 1 and prediction[0][1] == 0):
-        print("left")
+        direction = "left"
+        print(direction)
+        time.sleep(3)
 
     elif(prediction[0][0] < 0.5):
-        print("right")
+        direction = "right"
+        print(direction)
+        time.sleep(3)
 
     else:
-        print("None")
-
+        direction = "none"
+        print(direction)
+        time.sleep(3)
+        
     cv2.imshow("Prediction", frame)
     cv2.waitKey(1)
-
-    time.sleep(3)
