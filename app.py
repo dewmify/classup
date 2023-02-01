@@ -41,58 +41,84 @@ def slides():
 
 hand_model = load_model('HandGestureModel.h5')
 
-def gen_frames():  
+# def gen_frames():  
+#     video = cv2.VideoCapture(0)
+#     while True:
+#         success, frame = video.read()
+#         if not success:
+#             break
+#         else:
+#             ret, buffer = cv2.imencode('.jpg', frame)
+#             frame = buffer.tobytes()
+#             yield (b'--frame\r\n'
+#                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  
+
+
+# @app.route("/hand_video_feed")
+# def hand_video_feed():
+#     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+COMMAND = None
+
+def controlSlides():
     video = cv2.VideoCapture(0)
+    
     while True:
         success, frame = video.read()
         if not success:
             break
+
         else:
+            img = Image.fromarray(frame, 'RGB')
             ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
+            
+            frame_tobytes = buffer.tobytes()
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_tobytes + b'\r\n')
 
+            img = img.resize((128,128))
+            img_array = np.array(img)
+            
+            img_array = img_array.reshape(1,128,128,3)
 
-@app.route("/hand_video_feed")
-def hand_video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+            prediction = hand_model.predict(img_array)
+            print(prediction)
+            
+            if(prediction[0][0] == 1 and prediction[0][1] == 0):
+                direction = "left"
+                setcmdback()
+                time.sleep(2)
 
+            elif(prediction[0][0] < 0.5):
+                direction = "right"
+                setcmdnext()
+                time.sleep(2)
 
-@app.route("/controlSlides", methods=['POST'])
-def controlSlides():
-    video = cv2.VideoCapture(0)
+            else:
+                direction = "none"
+                time.sleep(1)
 
-    while True:
-        success, frame = video.read()
-
-        img = Image.fromarray(frame, 'RGB')
-
-        img = img.resize((128,128))
-        img_array = np.array(img)
-        
-        img_array = img_array.reshape(1,128,128,3)
-
-        prediction = hand_model.predict(img_array)
-        print(prediction)
-        
-        if(prediction[0][0] == 1 and prediction[0][1] == 0):
-            direction = "left"
+            
             print(direction)
-            time.sleep(3)
-
-        elif(prediction[0][0] < 0.5):
-            direction = "right"
-            print(direction)
-            time.sleep(3)
-
-        else:
-            direction = "none"
-            print(direction)
-            time.sleep(3)
-
-        #return jsonify({'result': direction})
-        
+            
 
         cv2.imshow("Prediction", frame)
         cv2.waitKey(1)
+
+@app.route("/controlSlides_feed")
+def controlSlides_feed():
+    global COMMAND
+    return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/setcmdnext/")
+def setcmdnext():
+    global COMMAND
+    COMMAND = 'next'
+    return jsonify({'command': COMMAND})
+    
+@app.route("/setcmdback/")
+def setcmdback():
+    global COMMAND
+    COMMAND = 'back'
+    return jsonify({'command': COMMAND})
