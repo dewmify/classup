@@ -40,7 +40,7 @@ app.config['MYSQL_DB'] = 'classupdb'
  
 mysql = MySQL(app)
 hand_model = load_model('models/HandGestureModel.h5')
-#sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 
 
@@ -88,11 +88,22 @@ def sample():
     return render_template(
         "sample-inner-page.html"
     )
-       
 
+@app.route("/student-class")
+def student_classes():
+    return render_template(
+        "student/student_class.html"
+    )
+
+@app.route("/student-index")
+def student_index():
+    return render_template(
+        "student/student_index.html"
+    )
+       
 @app.route("/reflection")
 def reflection():
-    return render_template('sentiment_reflection.html')
+    return render_template('student/sentiment_reflection.html')
 
 
 @app.route("/slides_list")
@@ -273,4 +284,4 @@ def prediction():
 
     print('sentiment:', result)
 
-    return render_template('sentiment_reflection.html', prediction_text=result)
+    return render_template('student/sentiment_reflection.html', prediction_text=result)
