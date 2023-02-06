@@ -13,9 +13,9 @@ from spacy.lang.en.stop_words import STOP_WORDS
 
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
-#from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL
 from keras.models import load_model
-#import MySQLdb.cursors
+import MySQLdb.cursors
 import re
 import cv2
 from PIL import Image
@@ -33,15 +33,15 @@ import tensorflow as tf
 
 app = Flask(__name__)
 
-#app.secret_key = 'secret'
+app.secret_key = 'secret'
  
-#app.config['MYSQL_HOST'] = 'localhost'
-#app.config['MYSQL_USER'] = 'root'
-#app.config['MYSQL_PASSWORD'] = 'password'
-#app.config['MYSQL_DB'] = 'classupdb'
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_DB'] = 'classupdb'
  
  
-#mysql = MySQL(app)
+mysql = MySQL(app)
 hand_model = load_model('models/HandGestureModel.h5')
 sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
