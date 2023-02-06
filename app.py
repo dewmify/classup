@@ -10,38 +10,39 @@ from keras_preprocessing.sequence import pad_sequences
 
 
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
-#from flask_mysqldb import MySQL
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response, flash
+from flask_mysqldb import MySQL
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from keras.models import load_model
 #import MySQLdb.cursors
 import re
 import cv2
 from PIL import Image
 import time
+import MySQLdb.cursors
 
-import numpy as np
-import tensorflow as tf
-
-import cv2
-from PIL import Image
-import time
+from wtforms import StringField, PasswordField, BooleanField, RadioField
+from wtforms.validators import InputRequired, Email, Length, Optional
 
 import numpy as np
 import tensorflow as tf
 
 app = Flask(__name__)
 
-#app.secret_key = 'secret'
+
+
+app.secret_key = 'secret'
  
-#app.config['MYSQL_HOST'] = 'localhost'
-#app.config['MYSQL_USER'] = 'root'
-#app.config['MYSQL_PASSWORD'] = 'password'
-#app.config['MYSQL_DB'] = 'classupdb'
+app.config['MYSQL_HOST'] = 'classupdb.cgdsnk6an6d3.us-east-1.rds.amazonaws.com'
+app.config['MYSQL_USER'] = 'admin'
+app.config['MYSQL_PASSWORD'] = 'bYaP6tsnsRFy1TIJVQAr'
+app.config['MYSQL_DB'] = 'classupdb'
  
- 
-#mysql = MySQL(app)
+mysql = MySQL(app)
 hand_model = load_model('models/HandGestureModel.h5')
 #sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+
+
 
 def preprocess_input_data(sentence):
     tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
@@ -54,10 +55,10 @@ def preprocess_input_data(sentence):
 
 @app.route("/")
 def home():
-    return render_template(
-        "index.html"
-    )
-
+    if 'loggedin' in session:
+        return render_template("index.html")
+    return redirect(url_for('login'))
+    
 @app.route("/slides")
 def slides():
     return render_template(
@@ -93,6 +94,44 @@ def sample():
 def reflection():
     return render_template('sentiment_reflection.html')
 
+
+@app.route("/slides_list")
+def slides_list():
+    return render_template('slides_list.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+
+        if user:
+            if check_password_hash(user.password, form.password.data):
+                login_user(user, remember=form.remember.data)
+                if user.role == "admin":
+                    session["email"] = user.email
+                    session["username"] = user.username
+                    return redirect(url_for('viewAllUsers'))
+                else:
+                    session["email"] = user.email
+                    session["username"] = user.username
+                    return redirect(url_for('consumerUpdateUser'))
+            else:
+                flash("Incorrect Username or password")
+
+                return redirect('/login')
+        else:
+            flash("Incorrect Username or Password")
+            return redirect('/login')
+
+    return render_template('login.html', form=form, user=current_user)
+
+@app.route("/account")
+def account():
+    return render_template('account.html')
+
+
 # def gen_frames():  
 #     video = cv2.VideoCapture(0)
 #     while True:
@@ -111,6 +150,7 @@ def reflection():
 #     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+global COMMAND
 COMMAND = None
 
 def controlSlides():
@@ -137,15 +177,21 @@ def controlSlides():
             prediction = hand_model.predict(img_array)
             print(prediction)
             
-            if(prediction[0][0] == 1 and prediction[0][1] == 0):
+            if(prediction[0][0] > 0.998):
                 direction = "left"
-                setcmdback()
-                time.sleep(2)
+                # response = {
+                #     'command': 'back'
+                # }
+                time.sleep(5)
+                #return jsonify(response)
 
             elif(prediction[0][0] < 0.5):
                 direction = "right"
-                setcmdnext()
-                time.sleep(2)
+                # response = {
+                #     'command': 'next'
+                # }
+                time.sleep(5)
+                #return jsonify(response)
 
             else:
                 direction = "none"
@@ -157,21 +203,52 @@ def controlSlides():
 
         cv2.imshow("Prediction", frame)
         cv2.waitKey(1)
+    #fetch("https://aap-dewmify-classup-image.ayftbvf4bbhqbudp.southeastasia.azurecontainer.io/command",{
+    #   method: "POST",
+    #   headers: {
+    #       "Content-Type": "application/json"     
+    #   },
+    #   body: {
+    #       'command': COMMAND
+    #   }
+    # })
+    #.then(response => response.json())
+    #.then(result => {
+    #   alert(result.result);
+    # })
 
 @app.route("/controlSlides_feed")
 def controlSlides_feed():
-    global COMMAND
     return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/command/", methods={"POST"})
+def command():
+    global COMMAND
+    #fetch("https://aap-dewmify-classup-image.ayftbvf4bbhqbudp.southeastasia.azurecontainer.io/command",{
+    #   method: "POST",
+    #   headers: {
+    #       "Content-Type": "application/json"     
+    #   },
+    #   body: {
+    #       'command': COMMAND
+    #   }
+    # })
+    #.then(response => response.json())
+    #.then(result => {
+    #   alert(result.result);
+    # })
+    returnvalue = jsonify({'command': COMMAND})
+    COMMAND = None
+    
+    return (returnvalue)
 
 @app.route("/setcmdnext/")
 def setcmdnext():
-    global COMMAND
     COMMAND = 'next'
     return jsonify({'command': COMMAND})
     
 @app.route("/setcmdback/")
 def setcmdback():
-    global COMMAND
     COMMAND = 'back'
     return jsonify({'command': COMMAND})
 

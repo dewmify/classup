@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Student's Reflection</title>
+  <title>[Template] Sample Inner Page</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -38,31 +38,39 @@
 
 <body>
 
-  <!-- ======= Header ======= -->
-  <!-- End Top Bar -->
+  <!-- ======= Header ======= --><!-- End Top Bar -->
 
   <header id="header" class="header d-flex align-items-center">
 
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-      <a href="/" class="logo d-flex align-items-center">
+      <a href="index.html" class="logo d-flex align-items-center">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="/static/img/logo.png" alt=""> -->
         <h1>ClassUp<span>!</span></h1>
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/blog">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
-              <li><a href="/reflections">Reflections</a></li>
-              
-              <li><a href="#">Account</a></li>
-              <li><a href="#">Grades</a></li>
+              <li><a href="#">Drop Down 1</a></li>
+              <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+                <ul>
+                  <li><a href="#">Deep Drop Down 1</a></li>
+                  <li><a href="#">Deep Drop Down 2</a></li>
+                  <li><a href="#">Deep Drop Down 3</a></li>
+                  <li><a href="#">Deep Drop Down 4</a></li>
+                  <li><a href="#">Deep Drop Down 5</a></li>
+                </ul>
+              </li>
+              <li><a href="#">Drop Down 2</a></li>
+              <li><a href="#">Drop Down 3</a></li>
+              <li><a href="#">Drop Down 4</a></li>
             </ul>
           </li>
-          <li><a href="#login">Welcome back, Max!</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
       </nav><!-- .navbar -->
 
@@ -81,7 +89,7 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Definitions & Evolution of AI</h2>
+              <h2>List of Slides</h2>
             </div>
           </div>
         </div>
@@ -89,8 +97,8 @@
       <nav>
         <div class="container">
           <ol>
-            <li><a href="/index">Home</a></li>
-            <li>Slides</li>
+            <li><a href="index.html">Home</a></li>
+            <li>Sample Inner Page</li>
           </ol>
         </div>
       </nav>
@@ -98,10 +106,54 @@
 
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
-        <div class="slides">
-          <iframe src="https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
-          <img src="{{ url_for('controlSlides_feed') }}" width="20%">
-        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Name</th>
+              <th scope="col">Date Added</th>
+              <th scope="col">Added by</th>
+              <th scope="col">Module</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td><a href = "{{ url_for('slides') }}" >Definitions & Evolution of AI</a></td>
+              <td>28/01/2023</td>
+              <td>Joshua</td>
+              <td>ABC123</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td><a href = "{{ url_for('slides') }}" >AI Ethics</a></td>
+              <td>28/01/2023</td>
+              <td>Joshua</td>
+              <td>ABC123</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td><a href = "{{ url_for('slides') }}" >Foundation of AI</a></td>
+              <td>28/01/2023</td>
+              <td>Joshua</td>
+              <td>ABC123</td>
+            </tr>
+            <tr>
+              <th scope="row">4</th>
+              <td><a href = "{{ url_for('slides') }}" >Understanding Deep Learning</a></td>
+              <td>28/01/2023</td>
+              <td>Joshua</td>
+              <td>ABC123</td>
+            </tr>
+            <tr>
+              <th scope="row">5</th>
+              <td><a href = "{{ url_for('slides') }}" >Creating a Flask Application</a></td>
+              <td>28/01/2023</td>
+              <td>Joshua</td>
+              <td>ABC123</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -197,5 +249,3 @@
 </body>
 
 </html>
-
-
