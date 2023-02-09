@@ -34,6 +34,40 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  <script>
+    function controlSlides() {
+      fetch('http://127.0.0.1:5000/api/v1/handgesture') 
+        .then((response) => {
+          return response.json();
+        })
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+
+          } else {
+            console.log(data.direction)
+            switch (data.direction) {
+              case 'left':
+                document.getElementById("slides").contentWindow.postMessage("action=previous", "https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777");
+                break;
+
+              case 'right':
+                document.getElementById("slides").contentWindow.postMessage("action=next", "https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777");
+                break;
+
+              default:
+                break;
+
+            }
+          }
+        })
+        .catch(error => {
+          alert(error);
+        });
+      }
+    
+    setInterval(controlSlides, 5000);
+  </script>
 </head>
 
 <body>
@@ -98,9 +132,9 @@
 
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
-        <div class="slides">
-          <iframe src="https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
-          <img src="{{ url_for('controlSlides_feed') }}" width="20%">
+        <div>
+          <iframe id="slides" src="https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+          <button onclick="controlSlides()">Control Slides</button>
         </div>
       </div>
     </section>
