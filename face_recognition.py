@@ -10,7 +10,7 @@ detection_model = face_detection_model = cv2.CascadeClassifier('haarcascade_fron
 # Dictionary to store true images and names
 true_images = {
     'Ryo': cv2.imread('static/OnboardedImg/true_image_1.png', 0),
-    'WillSmith': cv2.imread('static/OnboardedImg/true_image_2.png', 0),
+    'Max': cv2.imread('static/OnboardedImg/true_image_2.png', 0),
     
 }
  #Preprocess true images

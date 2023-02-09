@@ -46,7 +46,7 @@ def attendance():
         # Create Image path to store and retrieve
         # Use random number to allow same-image upload
         print("Saving image to static folder....")
-        img_path = "static/class_img" 
+        img_path = "static/class_img.jpg" 
         print("Image Path: ", img_path)
 
         if not os.path.exists("static"):
