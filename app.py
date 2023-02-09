@@ -109,7 +109,18 @@ def reflection():
 
 @app.route("/slides_list")
 def slides_list():
-    return render_template('teacher/slides_list.html')
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="test"
+    )
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM slides")
+    values = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('teacher/slides_list.html', values = values)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -187,6 +198,23 @@ def controlSlides_feed():
 def get_handgesture():
     direction = controlSlides()
     return json.dumps({'direction': direction})
+
+@app.route("/addSlides", methods=["POST"])
+def addSlides():
+    values = request.form.getlist("value")
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="test"
+    )
+    cursor = conn.cursor()
+    sql = "INSERT INTO slides (value) VALUES (%s)"
+    cursor.executemany(sql, [(value,) for value in values])
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Slides uploaded successfully!"    
 
 
 
