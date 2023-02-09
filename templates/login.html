@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Student's home</title>
+  <title>Login</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -54,13 +54,10 @@
           <li><a href="/">Home</a></li>
           <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
-              <li><a href="/student-index">Classes</a></li>
-              
-              <li><a href="#">Account</a></li>
-              <li><a href="#">Grades</a></li>
+              <!--<li><a href="/student-index">Classes</a></li>-->
             </ul>
           </li>
-          <li><a href="#login">Welcome back, Max!</a></li>
+          <li><a href="/login">Login</a></li>
         </ul>
       </nav><!-- .navbar -->
 
@@ -73,111 +70,47 @@
 
   <main id="main">
 
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="page-header d-flex align-items-center" style="background-image: url('');">
-        <div class="container position-relative">
-          <div class="row d-flex justify-content-center">
-            <div class="col-lg-6 text-center">
-              <h2>Classes</h2>
-              <p>Classes you are enrolled it this semester.</p>
+    <section class="sample-page">
+      <div class="container" data-aos="fade-up">
+        
+        <section id="services" class="services sections-bg">
+            <div class="container" data-aos="fade-up">
+      
+              <div class="section-header">
+                <h2>Login</h2>
+                
+              </div>
+      
+              <div class="row gy-2" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-sm">
+                  <div class="service-item position-relative">
+                    <div class="icon">
+                      <i class="bi bi-emoji-smile"></i>
+                    </div>
+                    <h3>Student Login</h3>
+                    <p>Click here if you're a student.</p>
+                    <a href="/login-student" class="readmore stretched-link">Proceed <i class="bi bi-arrow-right"></i></a>
+                  </div>
+                </div><!-- End Service Item -->
+      
+                <div class="col-sm">
+                  <div class="service-item position-relative">
+                    <div class="icon">
+                      <i class="bi bi-person-vcard"></i>
+                    </div>
+                    <h3>Teacher Login</h3>
+                    <p>Click here if you are a teacher.</p>
+                    <a href="/login-teacher" class="readmore stretched-link">Proceed <i class="bi bi-arrow-right"></i></a>
+                  </div>
+                </div><!-- End Service Item -->
+      
+              </div>
+      
             </div>
-          </div>
-        </div>
+          </section><!-- End Our Services Section -->
+
       </div>
-    </div><!-- End Breadcrumbs -->
-
-   
-         <!-- ======= Portfolio Section ======= -->
-    <section id="portfolio" class="portfolio sections-bg">
-        <div class="container" data-aos="fade-up">
-  
-          <div class="section-header">
-          </div>
-  
-          <div class="portfolio-isotope" data-portfolio-filter="*" data-portfolio-layout="masonry" data-portfolio-sort="original-order" data-aos="fade-up" data-aos-delay="100">
-  
-            <!--<div>
-              <ul class="portfolio-flters">
-                <li data-filter="*" class="filter-active">All</li>
-                <li data-filter=".filter-app">App</li>
-                <li data-filter=".filter-product">Product</li>
-                <li data-filter=".filter-branding">Branding</li>
-                <li data-filter=".filter-books">Books</li>
-              </ul><!-- End Portfolio Filters -->
-            </div>
-  
-            <div class="row gy-4 portfolio-container">
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="{{url_for('logout')}}" title="More Details">CLICK HERE TO LOGOUT</a></h4>
-                    <p>LOGOUT</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/product-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-1.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">Wireless technologies</a></h4>
-                    <p>Learn about wireless technologies and its uses</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-branding">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/branding-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/branding-1.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">Introduction to Skincare</a></h4>
-                    <p>Learn about skincare and its uses</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-books">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/books-1.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/books-1.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">Introduction to Writing</a></h4>
-                    <p>Learn how to write a book</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-app">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/app-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/app-2.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">Mobile Application Project</a></h4>
-                    <p>Learn how to create a mobile application</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">Film and Directing</a></h4>
-                    <p>Learn how to create a film and how to direct one</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-  
-            </div><!-- End Portfolio Container -->
-  
-          </div>
-  
-        </div>
-      </section><!-- End Portfolio Section -->
-
+    </section>
 
   </main><!-- End #main -->
 
