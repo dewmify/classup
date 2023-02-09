@@ -2,27 +2,27 @@ import transformers
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+import json
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from keras_preprocessing.sequence import pad_sequences
 
 import uuid
-import re
-import cv2
-import time
-import MySQLdb.cursors
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response, flash
 from flask_mysqldb import MySQL
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
 from keras.models import load_model
+import re
+import cv2
+import time
+from datetime import datetime
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
 from PIL import Image
 from flask_wtf import FlaskForm
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt, check_password_hash, generate_password_hash
-from sqlalchemy import create_engine
+from flask_bcrypt import Bcrypt
 
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
@@ -32,8 +32,6 @@ app = Flask(__name__)
 bootstrap = Bootstrap(app)
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
-
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -188,6 +186,11 @@ def home():
 def login():
         return render_template("login.html")
 
+@app.route("/logout", methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
 #admin routes --------------------
 @app.route("/login-admin", methods =['GET', 'POST'])
 def login_admin():
@@ -298,135 +301,50 @@ def slides_list():
 def account():
     return render_template('account.html')
 
-@app.route("/logout", methods=['GET', 'POST'])
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-
-# def gen_frames():  
-#     video = cv2.VideoCapture(0)
-#     while True:
-#         success, frame = video.read()
-#         if not success:
-#             break
-#         else:
-#             ret, buffer = cv2.imencode('.jpg', frame)
-#             frame = buffer.tobytes()
-#             yield (b'--frame\r\n'
-#                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  
-
-
-# @app.route("/hand_video_feed")
-# def hand_video_feed():
-#     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-# joshuas model
-
-global COMMAND
-COMMAND = None
-
 def controlSlides():
     video = cv2.VideoCapture(0)
     
-    while True:
-        success, frame = video.read()
-        if not success:
-            break
+    # while True:
+    success, frame = video.read()
+    cv2.imshow('frame', frame)
 
+    if not success:
+        return
+    else:
+        img = Image.fromarray(frame,'RGB')
+        ret, buffer = cv2.imencode('.jpg', frame)
+
+        img = img.resize((128,128))
+        img_array = np.array(img)
+
+        img_array = img_array.reshape(1,128,128,3)
+
+        prediction = hand_model.predict(img_array)
+
+        if(prediction[0][0] > 0.998):
+            direction = "left"
+        elif(prediction[0][0] < 0.5):
+            direction = "right"
         else:
-            img = Image.fromarray(frame, 'RGB')
-            ret, buffer = cv2.imencode('.jpg', frame)
-            
-            frame_tobytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_tobytes + b'\r\n')
+            direction = "none"
 
-            img = img.resize((128,128))
-            img_array = np.array(img)
-            
-            img_array = img_array.reshape(1,128,128,3)
+        print(direction)
 
-            prediction = hand_model.predict(img_array)
-            print(prediction)
-            
-            if(prediction[0][0] > 0.998):
-                direction = "left"
-                # response = {
-                #     'command': 'back'
-                # }
-                time.sleep(5)
-                #return jsonify(response)
+    video.release()
+    return direction
 
-            elif(prediction[0][0] < 0.5):
-                direction = "right"
-                # response = {
-                #     'command': 'next'
-                # }
-                time.sleep(5)
-                #return jsonify(response)
-
-            else:
-                direction = "none"
-                time.sleep(1)
-
-            
-            print(direction)
-            
-
-        cv2.imshow("Prediction", frame)
-        cv2.waitKey(1)
-    #fetch("https://aap-dewmify-classup-image.ayftbvf4bbhqbudp.southeastasia.azurecontainer.io/command",{
-    #   method: "POST",
-    #   headers: {
-    #       "Content-Type": "application/json"     
-    #   },
-    #   body: {
-    #       'command': COMMAND
-    #   }
-    # })
-    #.then(response => response.json())
-    #.then(result => {
-    #   alert(result.result);
-    # })
 
 @app.route("/controlSlides_feed")
 def controlSlides_feed():
     return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route("/command/", methods={"POST"})
-def command():
-    global COMMAND
-    #fetch("https://aap-dewmify-classup-image.ayftbvf4bbhqbudp.southeastasia.azurecontainer.io/command",{
-    #   method: "POST",
-    #   headers: {
-    #       "Content-Type": "application/json"     
-    #   },
-    #   body: {
-    #       'command': COMMAND
-    #   }
-    # })
-    #.then(response => response.json())
-    #.then(result => {
-    #   alert(result.result);
-    # })
-    returnvalue = jsonify({'command': COMMAND})
-    COMMAND = None
-    
-    return (returnvalue)
+@app.route('/api/v1/handgesture', methods=['GET'])
+def get_handgesture():
+    direction = controlSlides()
+    return json.dumps({'direction': direction})
 
-@app.route("/setcmdnext/")
-def setcmdnext():
-    COMMAND = 'next'
-    return jsonify({'command': COMMAND})
-    
-@app.route("/setcmdback/")
-def setcmdback():
-    COMMAND = 'back'
-    return jsonify({'command': COMMAND})
 
 # max model
-
 def preprocess_input_data(sentence):
     tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
     input_ids = tokenizer.encode(sentence, add_special_tokens=True)
