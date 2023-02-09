@@ -3,7 +3,7 @@ import math
 import face_detection
 
 video_capture = cv2.VideoCapture(0)
-counter = 5
+counter = 8
 
 while True:
     _, frame = video_capture.read()
@@ -15,7 +15,7 @@ while True:
     cv2.waitKey(1)
     counter -= 0.1
     if counter <= 0:
-        cv2.imwrite('static/OnboardedImg/true_image_2.png', face_box)
+        cv2.imwrite('static/AttendanceUploads/true_image_2.png', face_box)
         break
 
 # When everything is done, release the capture

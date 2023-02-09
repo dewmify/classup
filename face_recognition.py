@@ -9,8 +9,8 @@ import os
 detection_model = face_detection_model = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # Dictionary to store true images and names
 true_images = {
-    'Ryo': cv2.imread('static/OnboardedImg/true_image_1.png', 0),
-    'Max': cv2.imread('static/OnboardedImg/true_image_2.png', 0),
+    'Ryo': cv2.imread('static/AttendanceUploads/true_image_1.png', 0),
+    'WillSmith': cv2.imread('static/AttendanceUploads/true_image_2.png', 0),
     
 }
  #Preprocess true images
@@ -35,9 +35,12 @@ output_bottom = shared_network(input_bottom)
 distance = Lambda(face_detection.euclidean_distance, output_shape = (1,))([output_top, output_bottom])
 model = Model(inputs = [input_top, input_bottom], outputs = distance)
 
-model.load_weights('Siamese_nn.h5')
+model.load_weights('models/Siamese_nn.h5')
 
 def predict_face(img):
+    img = cv2.imread(img)
+    if type(img) != np.ndarray:
+        raise TypeError("Input image must be a numpy array")
     grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = detection_model.detectMultiScale(grayscale_img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
     if len(faces) == 0:
