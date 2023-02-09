@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <title>Image Upload Form</title>
+  </head>
+  <body>
+    <h2>Image Upload Form</h2>
+    <form action="/attendance_result" method="post" enctype="multipart/form-data">
+      <input type="file" type="file" name="class_img" >
+      <br><br>
+      <input type="submit" value="Submit">
+    </form>
+    {% if img_path %}
+    <img src="../{{img_path}}" alt="image-upload">
+    {% endif %}
+  </body>
+</html>
