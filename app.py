@@ -4,11 +4,12 @@ import numpy as np
 import subprocess
 import os
 import face_recognition
+import tensorflow as tf
+import json
+import uuid
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
-
-import tensorflow as tf
 from keras_preprocessing.sequence import pad_sequences
 
 from werkzeug.utils import secure_filename
@@ -22,34 +23,57 @@ from keras.layers import Input, Lambda
 #import MySQLdb.cursors
 import re
 import cv2
-from PIL import Image
 import time
-import MySQLdb.cursors
+from datetime import datetime
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
+from PIL import Image
+from flask_wtf import FlaskForm
+from flask_bootstrap import Bootstrap
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
-from wtforms import StringField, PasswordField, BooleanField, RadioField
-from wtforms.validators import InputRequired, Email, Length, Optional
-
-import numpy as np
-import tensorflow as tf
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField
+from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
 
 
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/AttendanceUploads/'
-
-app.secret_key = 'secret'
-
-# app.config['MYSQL_HOST'] = 'classupdb.cgdsnk6an6d3.us-east-1.rds.amazonaws.com'
-# app.config['MYSQL_USER'] = 'admin'
-# app.config['MYSQL_PASSWORD'] = 'bYaP6tsnsRFy1TIJVQAr'
-# app.config['MYSQL_DB'] = 'classupdb'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-#app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 512
 
 
-
+bootstrap = Bootstrap(app)
 mysql = MySQL(app)
+bcrypt = Bcrypt(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view="login"
+
+@login_manager.user_loader
+def load_student(studentid):
+    return Student.query.get(int(studentid))
+
+@login_manager.user_loader
+def load_admin(adminid):
+    return Admin.query.get(int(adminid))
+
+@login_manager.user_loader
+def load_teacher(teacherid):
+    return Teacher.query.get(int(teacherid))
+
+# database
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:bYaP6tsnsRFy1TIJVQAr@classupdb.cgdsnk6an6d3.us-east-1.rds.amazonaws.com/classupdb'
+app.config['SECRET_KEY'] = "Guysmynameisjefferson123"
+db = SQLAlchemy()
+db.init_app(app)
+
+
+
+# ai models
+
 hand_model = load_model('models/HandGestureModel.h5')
 #sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
@@ -59,173 +83,322 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
      
 
-def preprocess_input_data(sentence):
-    tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
-    input_ids = tokenizer.encode(sentence, add_special_tokens=True)
-    attention_mask = [1] * len(input_ids)
-    input_ids = pad_sequences([input_ids], maxlen=512, dtype="long", padding="post", truncating="post")
-    attention_mask = pad_sequences([attention_mask], maxlen=512, dtype="long", padding="post", truncating="post")
-    return input_ids, attention_mask
+# database class
+class Student(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    studentEmail = db.Column(db.String(100), nullable=False, unique=True)
+    studentName = db.Column(db.String(45), nullable=False)
+    studentPassword = db.Column(db.String(200), nullable=False)
+    studentImage = db.Column(db.String(45), nullable=False)
+    studentPresMath = db.Column(db.Integer, nullable=False)
+    studentPresScience = db.Column(db.Integer, nullable=False)
+    studentPresChinese = db.Column(db.Integer, nullable=False)
+    studentPresEnglish = db.Column(db.Integer, nullable=False)
+    studentisTaking = db.Column(db.Integer, nullable=False)
 
+    def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+        self.id = id
+        self.studentName = studentName
+        self.studentEmail = studentEmail
+        self.studentPassword = studentPassword
+        self.studentImage = studentImage
+        self.studentPresMath = studentPresMath
+        self.studentPresScience = studentPresScience
+        self.studentPresChinese = studentPresChinese
+        self.studentPresEnglish = studentPresEnglish
+        self.studentisTaking = studentisTaking
+
+class Admin(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    adminEmail = db.Column(db.String(45), nullable=False, unique=True)
+    adminPassword = db.Column(db.String(45), nullable=False)
+    
+    def __init__(self, id, adminEmail, adminPassword):
+      self.id = id
+      self.adminEmail = adminEmail
+      self.adminPassword = adminPassword
+
+class Teacher(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    teacherName = db.Column(db.String(100), nullable=False)
+    teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
+    teacherPassword = db.Column(db.String(100), nullable=False)
+    teacherSubject = db.Column(db.String(45), nullable=False)
+
+    def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
+        self.id = id
+        self.teacherName = teacherName
+        self.teacherEmail = teacherEmail
+        self.teacherPassword = teacherPassword
+        self.teacherSubject = teacherSubject
+
+class Subject(db.Model, UserMixin):
+    name = db.Column(db.String(100), primary_key=True)
+    numofStudents = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, name, numofStudents):
+        self.name = name
+        self.numofStudents = numofStudents
+
+class Topics(db.Model, UserMixin):
+    subjectName = db.Column(db.String(100), primary_key=True)
+    studentEmail = db.Column(db.String(100), nullable=False, unique=True)
+    week = db.Column(db.Integer, nullable=False)
+    sentiment = db.Column(db.String(45), nullable=False)
+    reflection = db.Column(db.String(150), nullable=False)
+
+    def __init__(self, subjectName, studentEmail, week, sentiment, reflection):
+        self.subjectName = subjectName
+        self.studentEmail = studentEmail
+        self.week = week
+        self.sentiment = sentiment
+        self.reflection = reflection
+
+
+with app.app_context():
+    db.create_all() 
+    db.session.commit()
+
+
+# forms
+
+# admin forms
+class adminCreateStudentForm(FlaskForm):
+    id= HiddenField('id')
+    studentName= StringField('Student Name', validators=[InputRequired()])
+    studentEmail= StringField('Student Email', validators=[InputRequired()])
+    studentPassword= PasswordField('Student Password', validators=[InputRequired()])
+    studentImage= StringField('Student Image', validators=[InputRequired()])
+    studentPresMath= HiddenField('presentmath')
+    studentPresScience= HiddenField('presentsci')
+    studentPresChinese= HiddenField('presentchi')
+    studentPresEnglish= HiddenField('presenteng')
+    studentisTaking= HiddenField('istaking')
+
+class adminCreateTeacherForm(FlaskForm):
+    id= HiddenField('id')
+    teacherName= StringField('Teacher Name', validators=[InputRequired()])
+    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
+    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+    teacherSubject= StringField('Teacher Subject', validators=[InputRequired()])
+
+# login forms
+class adminLoginForm(FlaskForm):
+    adminEmail= StringField('Admin Email', validators=[InputRequired()])
+    adminPass= PasswordField('Admin Password', validators=[InputRequired()])
+
+class studLoginForm(FlaskForm):
+    studentEmail= StringField('Student Email', validators=[InputRequired()])
+    studentPass= PasswordField('Student Password', validators=[InputRequired()])
+
+class teachLoginForm(FlaskForm):
+    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
+    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+
+
+# routes
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+        return render_template("index.html")
+
+@app.route("/login")
+def login():
+        return render_template("login.html")
+
+@app.route("/logout", methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+#admin routes --------------------
+@app.route("/login-admin", methods =['GET', 'POST'])
+def login_admin():
+        form = adminLoginForm()
+        if form.validate_on_submit():
+            admin = Admin.query.filter_by(adminEmail=form.adminEmail.data).first()
+            if admin:
+                if admin.adminPassword == form.adminPass.data:
+                    login_user(admin)
+                    return redirect(url_for('admin_dashboard'))
+        return render_template("admin/admin-login.html", form=form)
+
+@app.route("/admin-dashboard")
+def admin_dashboard():
+        return render_template("admin/admin-dashboard.html")
+
+@app.route("/admin-create-student", methods=['GET', 'POST'])
+def admin_create_student():
+        form = adminCreateStudentForm(request.values, id=uuid.uuid4().int, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
+        if form.validate_on_submit():
+            hashed_password = bcrypt.generate_password_hash(form.studentPassword.data)
+            new_student = Student(id= form.id.data,
+                                    studentName=form.studentName.data,
+                                    studentEmail=form.studentEmail.data, 
+                                    studentPassword=hashed_password,
+                                    studentImage=form.studentImage.data, 
+                                    studentPresMath=form.studentPresMath.data,
+                                    studentPresScience=form.studentPresScience.data,
+                                    studentPresChinese=form.studentPresChinese.data,
+                                    studentPresEnglish=form.studentPresEnglish.data,
+                                    studentisTaking=form.studentisTaking.data)
+            db.session.add(new_student)
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+        return render_template("admin/admin-create-student.html", form=form)
+
+@app.route("/admin-create-teacher", methods=['GET', 'POST'])
+def admin_create_teacher():
+        form = adminCreateTeacherForm(request.values, id=uuid.uuid4().int)
+        if form.validate_on_submit():
+            hashed_password = bcrypt.generate_password_hash(form.teacherPassword.data)
+            new_teacher = Teacher(id= form.id.data,
+                                    teacherName=form.teacherName.data,
+                                    teacherEmail=form.teacherEmail.data,
+                                    teacherPassword=hashed_password,
+                                    teacherSubject=form.teacherSubject.data
+                                  )
+            db.session.add(new_teacher)
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+        return render_template("admin/admin-create-teacher.html", form=form)
 
 
-@app.route('/test', methods=['GET', 'POST'])
-def upload_image():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            flash('No image selected for uploading')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            #filename = secure_filename(file.filename)
-            filename = "class_img.jpg"
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash('Image successfully uploaded and displayed below')
-            return render_template('test.html', filename=filename)
-        else:
-            flash('Allowed image types are - png, jpg, jpeg, gif')
-            return redirect(request.url)
-    else:
-        return render_template('test.html')
- 
-@app.route('/display/<filename>')
-def display_image(filename):
-    #print('display_image filename: ' + filename)
-    return redirect(url_for('static', filename='AttendanceUploads/' + filename), code=301)
-
-
-@app.route('/process_attendance', methods=['POST'])
-def process_attendance():
-    filename = "class_img.jpg"
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-    # Call the predict_faces function from face_detection.py
-    processed_image = face_recognition.predict_face(image_path)
-
-    # Save the processed image to disk
-    processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
-    cv2.imwrite(processed_image_path, processed_image)
-
-    return redirect(url_for('display_image', filename="processed_" + filename))
-
-
-
-    
-@app.route("/slides")
-def slides():
-    return render_template(
-        "slides.html"
-    )
-
-@app.route("/onboarding", methods=["GET", "POST"])
-def onboarding():
-    if request.method == "GET":
-        # Return the onboarding page
-        return render_template("onboarding.html")
-    else:
-        # Start the onboarding process by running the onboarding script
-        subprocess.run(["python", "onboarding.py"])
-        return "Onboarding started"
-
-# GET/POST method for prediction
-@app.route("/attendance", methods = ['GET','POST'])
-def attendance():
-    # When submitting
-    if request.method == 'POST':
-        print("Nutrition Analyser prediction ongoing ================ ")
-
-        # Get image from form
-        print("Obtaining image given.....")
-        img = request.files['class_img']
-        print("- Successfully obtained Image -")
-
-        # Create Image path to store and retrieve
-        # Use random number to allow same-image upload
-        print("Saving image to static folder....")
-        img_path = "/static/class_img.png" 
-        print("Image Path: ", img_path)
-
-        if not os.path.exists("static"):
-            os.mkdir("static")
-
-        img.save(img_path)
-        return render_template("attendance.html", img_path=img_path)
-    return render_template(
-        "attendance.html"
-    )
-    
-
-@app.route("/attendance_result", methods = ['GET','POST'])
-def attendance_result():
-    # When submitting
-    if request.method == 'POST':
-
-        img_path = "static/class_img.jpg" 
-        result_path = "static/result.jpg"
-        if not os.path.exists("static"):
-            os.mkdir("static")
-
-        return render_template("attendance_result.html", img_path=img_path,result_path=result_path)
-    return render_template(
-        "attendance_result.html"
-    )
-
-
-@app.route("/blog")
-def blog():
-    return render_template(
-        "blog.html"
-    )
-
-@app.route("/blog-details")
-def blog_details():
-    return render_template(
-        "blog-details.html"
-    )
-
-@app.route("/portfolio-details")
-def portfolio_details():
-    return render_template(
-        "portfolio-details.html"
-    )
-
-@app.route("/sample-inner-page")
-def sample():
-    return render_template(
-        "sample-inner-page.html"
-    )
+# student routes------------------
+@app.route("/login-student", methods =['GET', 'POST'])
+def login_student():
+        form = studLoginForm()
+        if form.validate_on_submit():
+            student = Student.query.filter_by(studentEmail=form.studentEmail.data).first()
+            hashed_password = student.studentPassword
+            password = form.studentPass.data
+            if student:
+                if bcrypt.check_password_hash(hashed_password, password):
+                    login_user(student)
+                    return redirect(url_for('student_index'))
+        return render_template("login_student.html", form=form)
 
 @app.route("/student-class")
 def student_classes():
-    return render_template(
-        "student/student_class.html"
-    )
+    return render_template("student/student_class.html")
 
 @app.route("/student-index")
 def student_index():
-    return render_template(
-        "student/student_index.html"
-    )
+    return render_template("student/student_index.html")
        
 @app.route("/reflection")
 def reflection():
     return render_template('student/sentiment_reflection.html')
 
 
+# teacher routes------------------------
+@app.route("/login-teacher", methods =['GET', 'POST'])
+def login_teacher():
+        form = teachLoginForm()
+        if form.validate_on_submit():
+            teacher = Teacher.query.filter_by(teacherEmail=form.teacherEmail.data).first()
+            hashed_password = teacher.teacherPassword
+            password = form.teacherPassword.data
+            if teacher:
+                if bcrypt.check_password_hash(hashed_password, password):
+                    login_user(teacher)
+                    return redirect(url_for('teacher_dashboard'))
+        return render_template("login_teacher.html", form=form)
+
+@app.route("/teacher-dashboard")
+def teacher_dashboard():
+    return render_template("teacher/teacher-dashboard.html")
+    
+
+#Joshua Stuff ----------------------
+@app.route("/slides")
+def slides():
+    return render_template("slides.html")
+
 @app.route("/slides_list")
 def slides_list():
-    return render_template('slides_list.html')
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="test"
+    )
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM slides")
+    values = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('teacher/slides_list.html', values = values)
 
 @app.route("/account")
 def account():
     return render_template('account.html')
+
+@app.route("/slides")
+def slides():
+    return render_template(
+        "slides.html"
+    )
+
+def controlSlides():
+    video = cv2.VideoCapture(0)
+    
+    # while True:
+    success, frame = video.read()
+    cv2.imshow('frame', frame)
+
+    if not success:
+        return
+    else:
+        img = Image.fromarray(frame,'RGB')
+        ret, buffer = cv2.imencode('.jpg', frame)
+
+        img = img.resize((128,128))
+        img_array = np.array(img)
+
+        img_array = img_array.reshape(1,128,128,3)
+
+        prediction = hand_model.predict(img_array)
+
+        if(prediction[0][0] > 0.998):
+            direction = "left"
+        elif(prediction[0][0] < 0.5):
+            direction = "right"
+        else:
+            direction = "none"
+
+        print(direction)
+
+    video.release()
+    return direction
+
+
+@app.route("/controlSlides_feed")
+def controlSlides_feed():
+    return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/api/v1/handgesture', methods=['GET'])
+def get_handgesture():
+    direction = controlSlides()
+    return json.dumps({'direction': direction})
+
+@app.route("/addSlides", methods=["POST"])
+def addSlides():
+    values = request.form.getlist("value")
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="test"
+    )
+    cursor = conn.cursor()
+    sql = "INSERT INTO slides (value) VALUES (%s)"
+    cursor.executemany(sql, [(value,) for value in values])
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return "Slides uploaded successfully!"  
+
 
 
 # def gen_frames():  
@@ -336,18 +509,149 @@ def command():
     returnvalue = jsonify({'command': COMMAND})
     COMMAND = None
     
-    return (returnvalue)
+    return (returnvalue)  
 
-@app.route("/setcmdnext/")
-def setcmdnext():
-    COMMAND = 'next'
-    return jsonify({'command': COMMAND})
+
+
+
+#Ryo stuff ------------------------
+@app.route('/test', methods=['GET', 'POST'])
+def upload_image():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No image selected for uploading')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            #filename = secure_filename(file.filename)
+            filename = "class_img.jpg"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            flash('Image successfully uploaded and displayed below')
+            return render_template('test.html', filename=filename)
+        else:
+            flash('Allowed image types are - png, jpg, jpeg, gif')
+            return redirect(request.url)
+    else:
+        return render_template('test.html')
+ 
+@app.route('/display/<filename>')
+def display_image(filename):
+    #print('display_image filename: ' + filename)
+    return redirect(url_for('static', filename='AttendanceUploads/' + filename), code=301)
+
+
+@app.route('/process_attendance', methods=['POST'])
+def process_attendance():
+    filename = "class_img.jpg"
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Call the predict_faces function from face_detection.py
+    processed_image = face_recognition.predict_face(image_path)
+
+    # Save the processed image to disk
+    processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
+    cv2.imwrite(processed_image_path, processed_image)
+
+    return redirect(url_for('display_image', filename="processed_" + filename))
+
+@app.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    if request.method == "GET":
+        # Return the onboarding page
+        return render_template("onboarding.html")
+    else:
+        # Start the onboarding process by running the onboarding script
+        subprocess.run(["python", "onboarding.py"])
+        return "Onboarding started"
+
+# GET/POST method for prediction
+@app.route("/attendance", methods = ['GET','POST'])
+def attendance():
+    # When submitting
+    if request.method == 'POST':
+        print("Nutrition Analyser prediction ongoing ================ ")
+
+        # Get image from form
+        print("Obtaining image given.....")
+        img = request.files['class_img']
+        print("- Successfully obtained Image -")
+
+        # Create Image path to store and retrieve
+        # Use random number to allow same-image upload
+        print("Saving image to static folder....")
+        img_path = "/static/class_img.png" 
+        print("Image Path: ", img_path)
+
+        if not os.path.exists("static"):
+            os.mkdir("static")
+
+        img.save(img_path)
+        return render_template("attendance.html", img_path=img_path)
+    return render_template(
+        "attendance.html"
+    )
     
-@app.route("/setcmdback/")
-def setcmdback():
-    COMMAND = 'back'
-    return jsonify({'command': COMMAND})
-# 
+
+@app.route("/attendance_result", methods = ['GET','POST'])
+def attendance_result():
+    # When submitting
+    if request.method == 'POST':
+
+        img_path = "static/class_img.jpg" 
+        result_path = "static/result.jpg"
+        if not os.path.exists("static"):
+            os.mkdir("static")
+
+        return render_template("attendance_result.html", img_path=img_path,result_path=result_path)
+    return render_template(
+        "attendance_result.html"
+    )
+
+
+
+
+
+
+# max model
+def preprocess_input_data(sentence):
+    tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
+    input_ids = tokenizer.encode(sentence, add_special_tokens=True)
+    attention_mask = [1] * len(input_ids)
+    input_ids = pad_sequences([input_ids], maxlen=512, dtype="long", padding="post", truncating="post")
+    attention_mask = pad_sequences([attention_mask], maxlen=512, dtype="long", padding="post", truncating="post")
+    return input_ids, attention_mask
+
+
+@app.route("/student-class")
+def student_classes():
+    return render_template(
+        "student/student_class.html"
+    )
+
+@app.route("/student-index")
+def student_index():
+    return render_template(
+        "student/student_index.html"
+    )
+       
+@app.route("/reflection")
+def reflection():
+    return render_template('student/sentiment_reflection.html')
+
+
+@app.route("/slides_list")
+def slides_list():
+    return render_template('slides_list.html')
+
+@app.route("/account")
+def account():
+    return render_template('account.html')
+
+
+
 # @app.route("/prediction", methods=["POST"])
 # def prediction():
     # new_reflection = [str(x) for x in request.form.values()]
@@ -371,3 +675,25 @@ def setcmdback():
 # 
     # return render_template('student/sentiment_reflection.html', prediction_text=result)
 # 
+#@app.route("/prediction", methods=["POST"])
+#def prediction():
+#    new_reflection = [str(x) for x in request.form.values()]
+#    input_prediction = new_reflection
+#    print("new reflection:", new_reflection)
+#    print("input_prediction:", input_prediction)
+#    print('inputs', sentimental_model.inputs)
+#    in_sensor= preprocess_input_data(str(input_prediction))
+#
+#    senti_prediction = sentimental_model.predict(in_sensor)[0]
+#
+#    class_index = np.argmax(senti_prediction)
+#    print('class index', class_index)
+#
+#    if class_index == 1:
+#        result = "Positive Sentiment"
+#    else:
+#       result = "Negative Sentiment"
+#
+#    print('sentiment:', result)
+#
+#    return render_template('student/sentiment_reflection.html', prediction_text=result)
