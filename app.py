@@ -67,7 +67,7 @@ hand_model = load_model('models/HandGestureModel.h5')
 # database class
 class Student(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
-    studentEmail = db.Column(db.String(100), nullable=False, unique=True)
+    studentEmail = db.Column(db.String(100), nullable=False)
     studentName = db.Column(db.String(45), nullable=False)
     studentPassword = db.Column(db.String(200), nullable=False)
     studentImage = db.Column(db.String(45), nullable=False)
@@ -213,7 +213,7 @@ def admin_create_student():
         form = adminCreateStudentForm(request.values, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.studentPassword.data)
-            new_student = Student(id= randrange(99999999999),
+            new_student = Student(id=randrange(0,999999999),
                                     studentName=form.studentName.data,
                                     studentEmail=form.studentEmail.data, 
                                     studentPassword=hashed_password,
@@ -233,7 +233,7 @@ def admin_create_teacher():
         form = adminCreateTeacherForm()
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.teacherPassword.data)
-            new_teacher = Teacher(id= randrange(0,99999999999),
+            new_teacher = Teacher(id= randrange(0,999999999),
                                     teacherName=form.teacherName.data,
                                     teacherEmail=form.teacherEmail.data,
                                     teacherPassword=hashed_password,
