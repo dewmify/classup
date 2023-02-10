@@ -334,12 +334,6 @@ def slides_list():
 def account():
     return render_template('account.html')
 
-@app.route("/slides")
-def slides():
-    return render_template(
-        "slides.html"
-    )
-
 def controlSlides():
     video = cv2.VideoCapture(0)
     
@@ -371,11 +365,6 @@ def controlSlides():
 
     video.release()
     return direction
-
-
-@app.route("/controlSlides_feed")
-def controlSlides_feed():
-    return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/api/v1/handgesture', methods=['GET'])
 def get_handgesture():
@@ -555,7 +544,7 @@ def process_attendance():
     processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
     cv2.imwrite(processed_image_path, processed_image)
 
-    return redirect(url_for('display_image', filename="processed_" + filename))
+    return render_template('attendance_result.html', filename="processed_" + filename)
 
 @app.route("/onboarding", methods=["GET", "POST"])
 def onboarding():
@@ -623,33 +612,6 @@ def preprocess_input_data(sentence):
     input_ids = pad_sequences([input_ids], maxlen=512, dtype="long", padding="post", truncating="post")
     attention_mask = pad_sequences([attention_mask], maxlen=512, dtype="long", padding="post", truncating="post")
     return input_ids, attention_mask
-
-
-@app.route("/student-class")
-def student_classes():
-    return render_template(
-        "student/student_class.html"
-    )
-
-@app.route("/student-index")
-def student_index():
-    return render_template(
-        "student/student_index.html"
-    )
-       
-@app.route("/reflection")
-def reflection():
-    return render_template('student/sentiment_reflection.html')
-
-
-@app.route("/slides_list")
-def slides_list():
-    return render_template('slides_list.html')
-
-@app.route("/account")
-def account():
-    return render_template('account.html')
-
 
 
 # @app.route("/prediction", methods=["POST"])
