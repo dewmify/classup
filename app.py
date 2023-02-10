@@ -26,6 +26,7 @@ from flask_bcrypt import Bcrypt
 
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
+from random import randrange
 
 app = Flask(__name__)
 
@@ -66,7 +67,7 @@ hand_model = load_model('models/HandGestureModel.h5')
 # database class
 class Student(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
-    studentEmail = db.Column(db.String(100), nullable=False, unique=True)
+    studentEmail = db.Column(db.String(100), nullable=False)
     studentName = db.Column(db.String(45), nullable=False)
     studentPassword = db.Column(db.String(200), nullable=False)
     studentImage = db.Column(db.String(45), nullable=False)
@@ -149,7 +150,7 @@ class Slides(db.Model, UserMixin):
           self.slidesSubject = slidesSubject
 
 with app.app_context():
-    db.create_all() 
+    db.create_all()
     db.session.commit()
 
 
@@ -229,10 +230,10 @@ def admin_dashboard():
 
 @app.route("/admin-create-student", methods=['GET', 'POST'])
 def admin_create_student():
-        form = adminCreateStudentForm(request.values, id=uuid.uuid4().int, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
+        form = adminCreateStudentForm(request.values, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.studentPassword.data)
-            new_student = Student(id= form.id.data,
+            new_student = Student(id=randrange(0,999999999),
                                     studentName=form.studentName.data,
                                     studentEmail=form.studentEmail.data, 
                                     studentPassword=hashed_password,
@@ -249,10 +250,10 @@ def admin_create_student():
 
 @app.route("/admin-create-teacher", methods=['GET', 'POST'])
 def admin_create_teacher():
-        form = adminCreateTeacherForm(request.values, id=uuid.uuid4().int)
+        form = adminCreateTeacherForm()
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.teacherPassword.data)
-            new_teacher = Teacher(id= form.id.data,
+            new_teacher = Teacher(id= randrange(0,999999999),
                                     teacherName=form.teacherName.data,
                                     teacherEmail=form.teacherEmail.data,
                                     teacherPassword=hashed_password,
