@@ -24,7 +24,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
 
 app = Flask(__name__)
@@ -134,6 +134,19 @@ class Topics(db.Model, UserMixin):
         self.sentiment = sentiment
         self.reflection = reflection
 
+class Slides(db.Model, UserMixin):
+     slidesId = db.Column(db.Integer, primary_key=True)
+     slidesName = db.Column(db.String(100), nullable = False)
+     slidesDate = db.Column(db.Date, nullable = False)
+     slidesAuthor = db.Column(db.String(100), nullable = False)
+     slidesSubject = db.Column(db.String(100), nullable = False)
+
+     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject):
+          self.slidesId = slidesId
+          self.slidesName = slidesName
+          self.slidesDate = slidesDate
+          self.slidesAuthor = slidesAuthor
+          self.slidesSubject = slidesSubject
 
 with app.app_context():
     db.create_all() 
@@ -175,6 +188,13 @@ class teachLoginForm(FlaskForm):
     teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
     teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
 
+#add slides form
+class addSlidesForm(FlaskForm):
+     slidesId = HiddenField('slidesId')
+     slidesName = StringField('Slides Name', validators=[InputRequired()])
+     slidesDate = DateField('Slides Date', validators=[InputRequired()])
+     slidesAuthor = StringField('Slides Author', validators=[InputRequired()])
+     slidesSubject = StringField('Slides Subject', validators=[InputRequired()])
 
 # routes
 
@@ -285,33 +305,43 @@ def login_teacher():
                     return redirect(url_for('teacher_dashboard'))
         return render_template("login_teacher.html", form=form)
 
+
+# teacher pages ---------------------------
 @app.route("/teacher-dashboard")
 def teacher_dashboard():
     return render_template("teacher/teacher-dashboard.html")
     
 @app.route("/slides")
 def slides():
-    return render_template("slides.html")
+    return render_template("teacher/slides.html")
 
 @app.route("/slides_list")
 def slides_list():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="test"
-    )
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM slides")
-    values = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('teacher/slides_list.html', values = values)
+    slidesList = Slides.query.all()      
+    return render_template('teacher/slides_list.html', slidesList = slidesList)
 
 @app.route("/account")
 def account():
     return render_template('account.html')
 
+
+@app.route("/addSlides", methods=["GET", "POST"])
+def addSlides():
+    form = addSlidesForm(request.values)
+    if form.validate_on_submit():
+        new_slides = Slides(
+                            slidesId = form.slidesId.data,
+                            slidesName=form.slidesName.data,
+                            slidesDate=form.slidesDate.data,
+                            slidesAuthor=form.slidesAuthor.data,
+                            slidesSubject=form.slidesSubject.data
+                            )
+        db.session.add(new_slides)
+        db.session.commit()
+        return redirect(url_for('slides_list'))
+    return render_template("teacher/add_slides.html", form=form)
+
+#joshua model-----------------------------------------
 def controlSlides():
     video = cv2.VideoCapture(0)
     
@@ -344,7 +374,6 @@ def controlSlides():
     video.release()
     return direction
 
-
 @app.route("/controlSlides_feed")
 def controlSlides_feed():
     return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -353,23 +382,8 @@ def controlSlides_feed():
 def get_handgesture():
     direction = controlSlides()
     return json.dumps({'direction': direction})
+         
 
-@app.route("/addSlides", methods=["POST"])
-def addSlides():
-    values = request.form.getlist("value")
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="test"
-    )
-    cursor = conn.cursor()
-    sql = "INSERT INTO slides (value) VALUES (%s)"
-    cursor.executemany(sql, [(value,) for value in values])
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Slides uploaded successfully!"    
 
 
 # max model

@@ -106,54 +106,38 @@
 
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col"></th>
-              <th scope="col">Name</th>
-              <th scope="col">Date Added</th>
-              <th scope="col">Added by</th>
-              <th scope="col">Module</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td><a href = "{{ url_for('slides') }}" >Definitions & Evolution of AI</a></td>
-              <td>28/01/2023</td>
-              <td>Joshua</td>
-              <td>ABC123</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td><a href = "{{ url_for('slides') }}" >AI Ethics</a></td>
-              <td>28/01/2023</td>
-              <td>Joshua</td>
-              <td>ABC123</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td><a href = "{{ url_for('slides') }}" >Foundation of AI</a></td>
-              <td>28/01/2023</td>
-              <td>Joshua</td>
-              <td>ABC123</td>
-            </tr>
-            <tr>
-              <th scope="row">4</th>
-              <td><a href = "{{ url_for('slides') }}" >Understanding Deep Learning</a></td>
-              <td>28/01/2023</td>
-              <td>Joshua</td>
-              <td>ABC123</td>
-            </tr>
-            <tr>
-              <th scope="row">5</th>
-              <td><a href = "{{ url_for('slides') }}" >Creating a Flask Application</a></td>
-              <td>28/01/2023</td>
-              <td>Joshua</td>
-              <td>ABC123</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="viewAllSlides">
+          <h3>List of Slides</h3>
+          {% if slidesList == [] %}
+              <img src="" style="width: 15%; margin-left:42.5%;">
+              <br>
+              <br>
+              <p>No slides added yet.</p>
+          {% else %}
+              <table class="table">
+                  <thead>
+                      <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">Title</th>
+                          <th scope="col">Date</th>
+                          <th scope="col">Author</th>
+                          <th scope="col">Subject</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for i in range(slidesList|length) %}
+                          <tr>
+                              <td>{{ slidesList[i].slidesId }}</td>
+                              <td>{{ slidesList[i].slidesName }}</td>
+                              <td>{{ slidesList[i].slidesDate }}</td>
+                              <td>{{ slidesList[i].slidesAuthor }}</td>
+                              <td>{{ slidesList[i].slidesSubject }}</td>
+                          </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          {% endif %}
+        </div>
       </div>
     </section>
 
