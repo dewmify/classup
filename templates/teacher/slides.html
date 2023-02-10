@@ -34,7 +34,17 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  {% set slides_src = slides.slidesLink %}
+  <input type="hidden"  id="slidesSrc" value="{{ slides_src }}">
+
   <script>
+
+    var slides_src = document.querySelector('#slidesSrc').value
+
+    $( window ).on( "load", function() {
+      $("#slides").attr("src", slides_src)
+    });
+    
     function controlSlides() {
       fetch('http://127.0.0.1:5000/api/v1/handgesture') 
         .then((response) => {
@@ -74,7 +84,6 @@
 </head>
 
 <body>
-
   <!-- ======= Header ======= -->
   <!-- End Top Bar -->
 
@@ -132,16 +141,14 @@
         </div>
       </nav>
     </div><!-- End Breadcrumbs -->
-
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
         <div>
-          <iframe id="slides" src="https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
-          <button onclick="controlSlides()">Control Slides</button>
+          <iframe id="slides" src="" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+          <!-- <button onclick="controlSlides()">Control Slides</button> -->
         </div>
       </div>
     </section>
-
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->

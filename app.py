@@ -141,13 +141,15 @@ class Slides(db.Model, UserMixin):
      slidesDate = db.Column(db.Date, nullable = False)
      slidesAuthor = db.Column(db.String(100), nullable = False)
      slidesSubject = db.Column(db.String(100), nullable = False)
+     slidesLink = db.Column(db.String(1000), nullable = False)
 
-     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject):
+     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink):
           self.slidesId = slidesId
           self.slidesName = slidesName
           self.slidesDate = slidesDate
           self.slidesAuthor = slidesAuthor
           self.slidesSubject = slidesSubject
+          self.slidesLink = slidesLink
 
 with app.app_context():
     db.create_all()
@@ -196,6 +198,7 @@ class addSlidesForm(FlaskForm):
      slidesDate = DateField('Slides Date', validators=[InputRequired()])
      slidesAuthor = StringField('Slides Author', validators=[InputRequired()])
      slidesSubject = StringField('Slides Subject', validators=[InputRequired()])
+     slidesLink = StringField("Slides Link (Embed Link from OneDrive)", validators=[InputRequired()])
 
 # routes
 
@@ -308,13 +311,15 @@ def login_teacher():
 
 
 # teacher pages ---------------------------
-@app.route("/teacher-dashboard")
+@app.route("/teacher_dashboard")
 def teacher_dashboard():
-    return render_template("teacher/teacher-dashboard.html")
+    slidesList = Slides.query.all()
+    return render_template("teacher/teacher_dashboard.html", slidesList = slidesList)
     
-@app.route("/slides")
-def slides():
-    return render_template("teacher/slides.html")
+@app.route("/<int:slidesId>/")
+def slides(slidesId):
+    slides = Slides.query.get_or_404(slidesId)
+    return render_template("teacher/slides.html", slides = slides)
 
 @app.route("/slides_list")
 def slides_list():
@@ -335,7 +340,8 @@ def addSlides():
                             slidesName=form.slidesName.data,
                             slidesDate=form.slidesDate.data,
                             slidesAuthor=form.slidesAuthor.data,
-                            slidesSubject=form.slidesSubject.data
+                            slidesSubject=form.slidesSubject.data,
+                            slidesLink=form.slidesLink.data
                             )
         db.session.add(new_slides)
         db.session.commit()

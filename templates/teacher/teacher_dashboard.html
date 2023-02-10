@@ -70,75 +70,66 @@
     </div>
   </header><!-- End Header -->
   <!-- End Header -->
-
-  <main id="main">
-
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="page-header d-flex align-items-center" style="background-image: url('');">
-        <div class="container position-relative">
-          <div class="row d-flex justify-content-center">
-            <div class="col-lg-6 text-center">
-              <h2>You are logged in.</h2>
-              <p>Information of the whole system.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div><!-- End Breadcrumbs -->
-
-   
-         <!-- ======= Portfolio Section ======= -->
-    <section id="portfolio" class="portfolio sections-bg">
-        <div class="container" data-aos="fade-up">
+  <section class="sample-page"> 
+    <div class="container" data-aos="fade-up">
+      <main id="main">
+        <h3>Teacher's Dashboard</h3>
+        <nav>
+          <ul>
+            <li><a href="#classes">View Classes</a></li>
+            <li><a href="#slides">View Slides</a></li>
+            <li><a href="#subjects">View Subjects</a></li>
+          </ul>
+        </nav>
+    
+        <main>
+          <section id="classes">
+            <h2>Classes</h2>
+            
+          </section>
+    
+          <section id="slides">
+            <h2>Slides</h2>
+            {% if slidesList == [] %}
+              <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
+              <br>
+              <br>
+              <p>No slides added yet.</p>
+            {% else %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Author</th>
+                            <th scope="col">Subject</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(slidesList|length) %}
+                            <tr>
+                                <td>{{ slidesList[i].slidesId }}</td>
+                                <td><a href="{{url_for('slides', slidesId = slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
+                                <td>{{ slidesList[i].slidesDate }}</td>
+                                <td>{{ slidesList[i].slidesAuthor }}</td>
+                                <td>{{ slidesList[i].slidesSubject }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            </section>
+    
+          <section id="subjects">
+            <h2>Subjects</h2>
+            <table>
+              
+            </table>
+          </section>
+    </div>
+  </section>
   
-          <div class="section-header">
-          </div>
-  
-          <div class="portfolio-isotope" data-portfolio-filter="*" data-portfolio-layout="masonry" data-portfolio-sort="original-order" data-aos="fade-up" data-aos-delay="100">
-  
-            <!--<div>
-              <ul class="portfolio-flters">
-                <li data-filter="*" class="filter-active">All</li>
-                <li data-filter=".filter-app">App</li>
-                <li data-filter=".filter-product">Product</li>
-                <li data-filter=".filter-branding">Branding</li>
-                <li data-filter=".filter-books">Books</li>
-              </ul><!-- End Portfolio Filters -->
-            </div>
-  
-            <div class="row gy-4 portfolio-container">
-  
-  
-              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="/student-class" title="More Details">You have successfully logged in</a></h4>
-                    <p>Create student and teacher now</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-
-              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
-                <div class="portfolio-wrap">
-                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
-                  <div class="portfolio-info">
-                    <h4><a href="{{url_for('logout')}}" title="More Details">CLICK HERE TO LOGOUT</a></h4>
-                    <p>LOGOUT</p>
-                  </div>
-                </div>
-              </div><!-- End Portfolio Item -->
-  
-  
-            </div><!-- End Portfolio Container -->
-  
-          </div>
-  
-        </div>
-      </section><!-- End Portfolio Section -->
-
-
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
