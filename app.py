@@ -4,9 +4,11 @@ import numpy as np
 import subprocess
 import os
 import face_recognition
+import face_detection
 import tensorflow as tf
 import json
 import uuid
+import math
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
@@ -32,7 +34,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField, FileField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
 from random import randrange
 
@@ -90,7 +92,7 @@ class Student(db.Model, UserMixin):
     studentEmail = db.Column(db.String(100), nullable=False)
     studentName = db.Column(db.String(45), nullable=False)
     studentPassword = db.Column(db.String(200), nullable=False)
-    studentImage = db.Column(db.String(45), nullable=False)
+    studentImage = db.Column(db.String(45), nullable=True)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
     studentPresChinese = db.Column(db.Integer, nullable=False)
@@ -182,7 +184,7 @@ class adminCreateStudentForm(FlaskForm):
     studentName= StringField('Student Name', validators=[InputRequired()])
     studentEmail= StringField('Student Email', validators=[InputRequired()])
     studentPassword= PasswordField('Student Password', validators=[InputRequired()])
-    studentImage= StringField('Student Image', validators=[InputRequired()])
+    studentImage= FileField('Student Image')
     studentPresMath= HiddenField('presentmath')
     studentPresScience= HiddenField('presentsci')
     studentPresChinese= HiddenField('presentchi')
@@ -216,6 +218,9 @@ class addSlidesForm(FlaskForm):
      slidesDate = DateField('Slides Date', validators=[InputRequired()])
      slidesAuthor = StringField('Slides Author', validators=[InputRequired()])
      slidesSubject = StringField('Slides Subject', validators=[InputRequired()])
+
+class onboardForm(FlaskForm):
+    onboardSubmit = SubmitField('Start Onboarding')
 
 # routes
 
@@ -265,7 +270,12 @@ def admin_create_student():
                                     studentisTaking=form.studentisTaking.data)
             db.session.add(new_student)
             db.session.commit()
-            return redirect(url_for('admin_dashboard'))
+            # Retrieve the newly created student
+            student = Student.query.filter_by(studentName=form.studentName.data).first()
+            
+            # Obtain the student id
+            student_id = student.id
+            return redirect(url_for('onboard',student_id=student_id))
         return render_template("admin/admin-create-student.html", form=form)
 
 @app.route("/admin-create-teacher", methods=['GET', 'POST'])
@@ -346,23 +356,6 @@ def slides_list():
 @app.route("/account")
 def account():
     return render_template('account.html')
-
-
-@app.route("/addSlides", methods=["GET", "POST"])
-def addSlides():
-    form = addSlidesForm(request.values)
-    if form.validate_on_submit():
-        new_slides = Slides(
-                            slidesId = form.slidesId.data,
-                            slidesName=form.slidesName.data,
-                            slidesDate=form.slidesDate.data,
-                            slidesAuthor=form.slidesAuthor.data,
-                            slidesSubject=form.slidesSubject.data
-                            )
-        db.session.add(new_slides)
-        db.session.commit()
-        return redirect(url_for('slides_list'))
-    return render_template("teacher/add_slides.html", form=form)
 
 #joshua model-----------------------------------------
 def controlSlides():
@@ -511,10 +504,6 @@ def controlSlides():
     #   alert(result.result);
     # })
 
-@app.route("/controlSlides_feed")
-def controlSlides_feed():
-    return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 @app.route("/command/", methods={"POST"})
 def command():
     global COMMAND
@@ -540,7 +529,7 @@ def command():
 
 
 #Ryo stuff ------------------------
-@app.route('/test', methods=['GET', 'POST'])
+@app.route('/attendance', methods=['GET', 'POST'])
 def upload_image():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -555,12 +544,12 @@ def upload_image():
             filename = "class_img.jpg"
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             flash('Image successfully uploaded and displayed below')
-            return render_template('test.html', filename=filename)
+            return render_template('attendance.html', filename=filename)
         else:
             flash('Allowed image types are - png, jpg, jpeg, gif')
             return redirect(request.url)
     else:
-        return render_template('test.html')
+        return render_template('attendance.html')
  
 @app.route('/display/<filename>')
 def display_image(filename):
@@ -582,63 +571,54 @@ def process_attendance():
 
     return render_template('attendance_result.html', filename="processed_" + filename)
 
-@app.route("/onboarding", methods=["GET", "POST"])
-def onboarding():
-    if request.method == "GET":
-        # Return the onboarding page
-        return render_template("onboarding.html")
-    else:
-        # Start the onboarding process by running the onboarding script
-        subprocess.run(["python", "onboarding.py"])
-        return "Onboarding started"
 
-# GET/POST method for prediction
-@app.route("/attendance", methods = ['GET','POST'])
-def attendance():
-    # When submitting
-    if request.method == 'POST':
-        print("Nutrition Analyser prediction ongoing ================ ")
+def onboarding(student_id):
+    video_capture = cv2.VideoCapture(0)
+    counter = 8
 
-        # Get image from form
-        print("Obtaining image given.....")
-        img = request.files['class_img']
-        print("- Successfully obtained Image -")
+    while True:
+        _, frame = video_capture.read()
+        frame, face_box, face_coords = face_detection.detect_faces(frame)
+        text = 'Image will be taken in {}..'.format(math.ceil(counter))
+        if face_box is not None:
+            frame = face_detection.write_on_frame(frame, text, face_coords[0], face_coords[1]-10)
+        cv2.imshow('Video', frame)
+        cv2.waitKey(1)
+        counter -= 0.1
+        if counter <= 0:
+            imgpath = 'static/AttendanceUploads/true_image_' + str(student_id) + '.png'
+            cv2.imwrite(imgpath, face_box)
+            #Update the Student object in the database
+            student = Student.query.get(student_id)
+            student.studentImage = imgpath
+            db.session.commit()
+            break
 
-        # Create Image path to store and retrieve
-        # Use random number to allow same-image upload
-        print("Saving image to static folder....")
-        img_path = "/static/class_img.png" 
-        print("Image Path: ", img_path)
+    # When everything is done, release the capture
+    video_capture.release()
+    cv2.destroyAllWindows()
+    print("Onboarding Image Captured")
 
-        if not os.path.exists("static"):
-            os.mkdir("static")
 
-        img.save(img_path)
-        return render_template("attendance.html", img_path=img_path)
-    return render_template(
-        "attendance.html"
-    )
+
+@app.route('/onboarding/<int:student_id>', methods=["GET","POST"])
+def onboard(student_id):
+    student = Student.query.get(student_id)
+    #form = onboardForm()
+    #if form.validate_on_submit():
+    onboarding(student_id)
+    return render_template('onboarding.html', student=student)
     
 
-@app.route("/attendance_result", methods = ['GET','POST'])
-def attendance_result():
-    # When submitting
-    if request.method == 'POST':
-
-        img_path = "static/class_img.jpg" 
-        result_path = "static/result.jpg"
-        if not os.path.exists("static"):
-            os.mkdir("static")
-
-        return render_template("attendance_result.html", img_path=img_path,result_path=result_path)
-    return render_template(
-        "attendance_result.html"
-    )
-
-
-
-
-
+# @app.route("/onboarding", methods=["GET", "POST"])
+# def onboarding():
+#     if request.method == "GET":
+#         # Return the onboarding page
+#         return render_template("onboarding.html")
+#     else:
+#         # Start the onboarding process by running the onboarding script
+#         subprocess.run(["python", "onboarding.py"])
+        
 
 # max model
 def preprocess_input_data(sentence):
