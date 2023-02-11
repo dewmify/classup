@@ -62,7 +62,7 @@ db.init_app(app)
 # ai models
 
 hand_model = load_model('models/HandGestureModel.h5')
-sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+#sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 # database class
 
@@ -84,9 +84,6 @@ class User(db.Model):
          self.email = email
          self.name = name
          self.password = password
-    
-
-
 
 class Teacher(User):
     __tablename__ = 'teachers'
@@ -105,7 +102,7 @@ class Teacher(User):
 class Student(User):
     __tablename__ = 'students'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
-    studentImage = db.Column(db.String(45), nullable=False)
+    studentImage = db.Column(db.String(45), nullable=True)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
     studentPresChinese = db.Column(db.Integer, nullable=False)
@@ -335,10 +332,10 @@ def admin_dashboard():
 def admin_create_student():
         form = adminCreateStudentForm(request.values, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.studentPassword.data)
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
             new_student = Student(id=randrange(0,999999999),
-                                    studentName=form.studentName.data,
-                                    studentEmail=form.studentEmail.data, 
+                                    name=form.name.data,
+                                    email=form.email.data, 
                                     studentPassword=hashed_password,
                                     studentImage=form.studentImage.data, 
                                     studentPresMath=form.studentPresMath.data,
@@ -355,11 +352,11 @@ def admin_create_student():
 def admin_create_teacher():
         form = adminCreateTeacherForm()
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.teacherPassword.data)
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
             new_teacher = Teacher(id= randrange(0,999999999),
-                                    teacherName=form.teacherName.data,
-                                    teacherEmail=form.teacherEmail.data,
-                                    teacherPassword=hashed_password,
+                                    name=form.name.data,
+                                    email=form.email.data,
+                                    password=hashed_password,
                                     teacherSubject=form.teacherSubject.data
                                   )
             db.session.add(new_teacher)
@@ -414,39 +411,43 @@ def student_classes(value):
     
     return render_template("student/student_class.html", topics_list=sorted_topics_list, topic_subject=topic_subject)
        
-@app.route("/reflection", methods =['GET', 'POST'])
-def reflection():
+@app.route("/reflection/<topic_subject>/<topicWeek>/<topicName>", methods =['GET', 'POST'])
+def reflection(topic_subject, topicWeek, topicName):
     form = studentReflectionForm()
-
-    if form.validate_on_submit():
-        input_reflection = [str(x) for x in request.form.values()]
-        input_prediction = input_reflection
-        print("new reflection:", input_reflection)
-        print("input_prediction:", input_prediction)
-        print('inputs', sentimental_model.inputs)
-        in_sensor= preprocess_input_data(str(input_prediction))
-
-        senti_prediction = sentimental_model.predict(in_sensor)[0]
-
-        class_index = np.argmax(senti_prediction)
-        print('class index', class_index)
-
-        if class_index == 1:
-            result = "Positive"
-        else:
-            result = "Negative"
-        print('sentiment:', result)
-        new_reflection=Reflection(id= randrange(0,999999999),
-                                    subjectName="Math",
-                                    topicName="Introduction to Algebra",
-                                    week=1,
-                                    studentEmail="testpred@mail.com",
-                                    reflection= str(input_reflection[-1]),
-                                    sentiment=result)
-        db.session.add(new_reflection)
-        db.session.commit()
-        return redirect(url_for('reflection_submitted'))
-    return render_template('student/sentiment_reflection.html', form=form)
+    topic_subject = topic_subject
+    topicWeek = topicWeek
+    topicName = topicName
+    student_email = current_user.email
+#
+    #if form.validate_on_submit():
+    #    input_reflection = [str(x) for x in request.form.values()]
+    #    input_prediction = input_reflection
+    #    print("new reflection:", input_reflection)
+    #    print("input_prediction:", input_prediction)
+    #    print('inputs', sentimental_model.inputs)
+    #    in_sensor= preprocess_input_data(str(input_prediction))
+#
+    #    senti_prediction = sentimental_model.predict(in_sensor)[0]
+#
+    #    class_index = np.argmax(senti_prediction)
+    #    print('class index', class_index)
+#
+    #    if class_index == 1:
+    #        result = "Positive"
+    #    else:
+    #        result = "Negative"
+    #    print('sentiment:', result)
+    #    new_reflection=Reflection(id= randrange(0,999999999),
+    #                                subjectName=topic_subject,
+    #                                topicName=topicName,
+    #                                week=topicWeek,
+    #                                studentEmail=student_email,
+    #                                reflection= str(input_reflection[-1]),
+    #                                sentiment=result)
+    #    db.session.add(new_reflection)
+    #    db.session.commit()
+    #    return redirect(url_for('reflection_submitted'))
+    return render_template('student/sentiment_reflection.html', form=form, topic_subject=topic_subject, topicWeek=topicWeek, topicName=topicName)
 
 @app.route("/reflection-submitted")
 def reflection_submitted():

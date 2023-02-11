@@ -117,7 +117,7 @@
 
             <div class="accordion accordion-flush" id="faqlist" data-aos="fade-up" data-aos-delay="100">
                 {% for topic in topics_list %}
-                  <div class="accordion-item">
+                  <div class="accordion-item" data-value="{{topic_subject}}, {{topic.topicWeek}}, {{topic.topicName}}">
                     <h3 class="accordion-header">
                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-{{loop.index}}">
                         <span class="num">Week {{topic.topicWeek}}</span>
@@ -126,7 +126,7 @@
                     </h3>
                     <div id="faq-content-{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
                       <div class="accordion-body">
-                        <a href="/reflection">Write your reflection for this week</a>
+                        <a href="/reflection/{{topic_subject}}/{{topic.topicWeek}}/{{topic.topicName}}">Write your reflection for this week</a>
                       </div>
                     </div>
                   </div><!-- # Faq item-->
@@ -287,6 +287,19 @@
 
 <!-- Template Main JS File -->
 <script src="/static/js/main.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('.accordion-item').click(function() {
+        var values = $(this).data('value').split(',');
+        var topic_subject = values[0];
+        var topicWeek = values[1];
+        var topicname= values[2];
+        $('.accordion-body').attr('href', '/reflection/' + topic_subject + '/' + topicWeek + '/' + topicName);
+        window.location.href = '/reflection/' + topic_subject + '/' + topicWeek + '/' + topicName;
+      });
+    });
+  </script>
 
 </body>
 

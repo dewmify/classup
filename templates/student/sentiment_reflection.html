@@ -106,7 +106,7 @@
         </p>
      
           <!-- Main Input For Receiving Query to our ML -->
-         <form action="/reflection"method="POST" class="form-student-reflection">
+         <form action="/reflection/{{topic_subject}}/{{topicWeek}}/{{topicName}}" method="POST" class="form-student-reflection">
             {{ form.hidden_tag() }}
             <div class="form-group mt-3">
               {{ wtf.form_field(form.reflection, placeholder="This class is....", size="100") }}

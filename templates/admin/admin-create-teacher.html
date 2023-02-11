@@ -104,16 +104,17 @@
               <div class="row">
                 {{ form.hidden_tag() }}
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.teacherName) }}
+                  {{ wtf.form_field(form.email) }}
+
                 </div>
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.teacherEmail) }}
+                  {{ wtf.form_field(form.name) }}
                 </div>
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.teacherPassword, style="height: 50px;") }}
+                  {{ wtf.form_field(form.password, style="height: 50px;") }}
                 </div>
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.teacherSubject) }}
+                  {{ wtf.form_field(form.teacherSubject) }}  
                 </div>
               </div>
               <br>
