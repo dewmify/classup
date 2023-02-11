@@ -62,7 +62,7 @@ db.init_app(app)
 # ai models
 
 hand_model = load_model('models/HandGestureModel.h5')
-#sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 # database class
 
@@ -418,34 +418,34 @@ def student_classes(value):
 def reflection():
     form = studentReflectionForm()
 
-    #if form.validate_on_submit():
-    #    input_reflection = [str(x) for x in request.form.values()]
-    #    input_prediction = input_reflection
-    #    print("new reflection:", input_reflection)
-    #    print("input_prediction:", input_prediction)
-    #    print('inputs', sentimental_model.inputs)
-    #    in_sensor= preprocess_input_data(str(input_prediction))
-#
-    #    senti_prediction = sentimental_model.predict(in_sensor)[0]
-#
-    #    class_index = np.argmax(senti_prediction)
-    #    print('class index', class_index)
-#
-    #    if class_index == 1:
-    #        result = "Positive"
-    #    else:
-    #        result = "Negative"
-    #    print('sentiment:', result)
-    #    new_reflection=Reflection(id= randrange(0,999999999),
-    #                                subjectName="Math",
-    #                                topicName="Introduction to Algebra",
-    #                                week=1,
-    #                                studentEmail="testpred@mail.com",
-    #                                reflection= str(input_reflection[-1]),
-    #                                sentiment=result)
-    #    db.session.add(new_reflection)
-    #    db.session.commit()
-    #    return redirect(url_for('reflection_submitted'))
+    if form.validate_on_submit():
+        input_reflection = [str(x) for x in request.form.values()]
+        input_prediction = input_reflection
+        print("new reflection:", input_reflection)
+        print("input_prediction:", input_prediction)
+        print('inputs', sentimental_model.inputs)
+        in_sensor= preprocess_input_data(str(input_prediction))
+
+        senti_prediction = sentimental_model.predict(in_sensor)[0]
+
+        class_index = np.argmax(senti_prediction)
+        print('class index', class_index)
+
+        if class_index == 1:
+            result = "Positive"
+        else:
+            result = "Negative"
+        print('sentiment:', result)
+        new_reflection=Reflection(id= randrange(0,999999999),
+                                    subjectName="Math",
+                                    topicName="Introduction to Algebra",
+                                    week=1,
+                                    studentEmail="testpred@mail.com",
+                                    reflection= str(input_reflection[-1]),
+                                    sentiment=result)
+        db.session.add(new_reflection)
+        db.session.commit()
+        return redirect(url_for('reflection_submitted'))
     return render_template('student/sentiment_reflection.html', form=form)
 
 @app.route("/reflection-submitted")
@@ -554,9 +554,7 @@ def get_handgesture():
     return json.dumps({'direction': direction})
          
 
-
-
-# max model
+# max model-------------------------------------------
 def preprocess_input_data(sentence):
     tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
     input_ids = tokenizer.encode(sentence, add_special_tokens=True)
