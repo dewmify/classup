@@ -55,9 +55,9 @@
           <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="/student-index">Classes</a></li>
-              
               <li><a href="#">Account</a></li>
               <li><a href="#">Grades</a></li>
+              <li><a href="{{url_for('logout')}}">Logout</a></li>
             </ul>
           </li>
           <li><a href="#login">Welcome back, Max!</a></li>
@@ -89,7 +89,7 @@
         <div class="container">
           <ol>
             <li><a href="/student-index">Home</a></li>
-            <li>Mobile Application Project</li>
+            <li>{{topic_subject}}</li>
           </ol>
         </div>
       </nav>
@@ -106,7 +106,7 @@
 
           <div class="col-lg-4">
             <div class="content px-xl-5">
-              <h3>Topics for <strong>Mobile Application Project</strong></h3>
+              <h3>Topics for <strong>{{topic_subject}}</strong></h3>
               <p>
                 The topics in this module are on the left
               </p>
@@ -116,22 +116,23 @@
           <div class="col-lg-8">
 
             <div class="accordion accordion-flush" id="faqlist" data-aos="fade-up" data-aos-delay="100">
+                {% for topic in topics_list %}
+                  <div class="accordion-item">
+                    <h3 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-{{loop.index}}">
+                        <span class="num">Week {{topic.topicWeek}}</span>
+                        {{topic.topicName}}
+                      </button>
+                    </h3>
+                    <div id="faq-content-{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                      <div class="accordion-body">
+                        <a href="/reflection">Write your reflection for this week</a>
+                      </div>
+                    </div>
+                  </div><!-- # Faq item-->
+                {% endfor %}
 
-              <div class="accordion-item">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-1">
-                    <span class="num">Week 1</span>
-                    Introduction to Mobile Applications
-                  </button>
-                </h3>
-                <div id="faq-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    <a href="/reflection">Write your reflection for this week</a>
-                  </div>
-                </div>
-              </div><!-- # Faq item-->
-
-              <div class="accordion-item">
+              <!--<div class="accordion-item">
                 <h3 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-2">
                     <span class="num">Week 2</span>
@@ -145,7 +146,7 @@
                 </div>
               </div><!-- # Faq item-->
 
-              <div class="accordion-item">
+              <!--<div class="accordion-item">
                 <h3 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-3">
                     <span class="num">Week 3</span>
@@ -159,7 +160,7 @@
                 </div>
               </div><!-- # Faq item-->
 
-              <div class="accordion-item">
+              <!--<div class="accordion-item">
                 <h3 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-4">
                     <span class="num">Week 4</span>
@@ -173,7 +174,7 @@
                 </div>
               </div><!-- # Faq item-->
 
-              <div class="accordion-item">
+              <!--<div class="accordion-item">
                 <h3 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-5">
                     <span class="num">Week 5</span>

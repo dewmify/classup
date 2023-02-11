@@ -17,7 +17,7 @@ import re
 import cv2
 import time
 from datetime import datetime
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager, current_user
 from PIL import Image
 from flask_wtf import FlaskForm
 from flask_bootstrap import Bootstrap
@@ -62,7 +62,7 @@ db.init_app(app)
 # ai models
 
 hand_model = load_model('models/HandGestureModel.h5')
-#sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 # database class
 class Student(db.Model, UserMixin):
@@ -114,27 +114,44 @@ class Teacher(db.Model, UserMixin):
         self.teacherSubject = teacherSubject
 
 class Subject(db.Model, UserMixin):
-    name = db.Column(db.String(100), primary_key=True)
-    numofStudents = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    name = db.Column(db.String(100))
+    numofStudents = db.Column(db.Integer)
 
-    def __init__(self, name, numofStudents):
+    def __init__(self, id, name, numofStudents):
+        self.id = id
         self.name = name
         self.numofStudents = numofStudents
 
-class Topics(db.Model, UserMixin):
-    subjectName = db.Column(db.String(100), primary_key=True)
-    studentEmail = db.Column(db.String(100), nullable=False, unique=True)
+class Topic(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    topicSubject = db.Column(db.String(100))
+    topicName = db.Column(db.String(100))
+    topicWeek = db.Column(db.Integer, nullable=False)
+    
+    def __init__(self, id, topicSubject, topicName, topicWeek):
+        self.id = id
+        self.topicSubject = topicSubject
+        self.topicName = topicName
+        self.topicWeek = topicWeek
+
+class Reflection(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    subjectName = db.Column(db.String(100))
+    topicName = db.Column(db.String(100), nullable=False)
     week = db.Column(db.Integer, nullable=False)
+    studentEmail = db.Column(db.String(100), nullable=False)
+    reflection = db.Column(db.String(255), nullable=False)
     sentiment = db.Column(db.String(45), nullable=False)
-    reflection = db.Column(db.String(150), nullable=False)
 
-    def __init__(self, subjectName, studentEmail, week, sentiment, reflection):
+    def __init__(self, id, subjectName, topicName, week, studentEmail, reflection, sentiment):
+        self.id = id
         self.subjectName = subjectName
-        self.studentEmail = studentEmail
+        self.topicName = topicName
         self.week = week
-        self.sentiment = sentiment
+        self.studentEmail = studentEmail
         self.reflection = reflection
-
+        self.sentiment = sentiment
 
 with app.app_context():
     db.create_all()
@@ -162,6 +179,13 @@ class adminCreateTeacherForm(FlaskForm):
     teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
     teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
     teacherSubject= StringField('Teacher Subject', validators=[InputRequired()])
+    
+class adminCreateTopicForm(FlaskForm):
+    id= HiddenField('id')
+    topicSubject= RadioField('Topics Subject', validators=[InputRequired()], choices=['Math', 'Science', 'English', 'Chinese'])
+    topicName= StringField('Topics Name', validators=[InputRequired()])
+    topicWeek= StringField('Week', validators=[InputRequired()])
+
 
 # login forms
 class adminLoginForm(FlaskForm):
@@ -175,6 +199,16 @@ class studLoginForm(FlaskForm):
 class teachLoginForm(FlaskForm):
     teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
     teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+
+#reflection form
+class studentReflectionForm(FlaskForm):
+    id= HiddenField('id')
+    subjectName=HiddenField('subjectname')
+    topicName=HiddenField('topicname')
+    week=HiddenField('week')
+    studentEmail=HiddenField('studentemail')
+    reflection= StringField('', validators=[InputRequired()])
+    sentiment=HiddenField('sentiment')
 
 
 # routes
@@ -244,6 +278,19 @@ def admin_create_teacher():
             return redirect(url_for('admin_dashboard'))
         return render_template("admin/admin-create-teacher.html", form=form)
 
+@app.route("/admin-create-topic", methods=['GET', 'POST'])
+def admin_create_topic():
+        form = adminCreateTopicForm()
+        if form.validate_on_submit():
+            new_topic = Topic(id= randrange(0,999999999),
+                                topicSubject=form.topicSubject.data,
+                                topicName=form.topicName.data,
+                                topicWeek=form.topicWeek.data)
+            db.session.add(new_topic)
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+        return render_template("admin/admin-create-topic.html", form=form)
+ 
 
 # student routes------------------
 @app.route("/login-student", methods =['GET', 'POST'])
@@ -259,17 +306,61 @@ def login_student():
                     return redirect(url_for('student_index'))
         return render_template("login_student.html", form=form)
 
-@app.route("/student-class")
-def student_classes():
-    return render_template("student/student_class.html")
-
 @app.route("/student-index")
 def student_index():
     return render_template("student/student_index.html")
+
+@app.route("/student-class/<value>")
+def student_classes(value):
+    topics_list= []
+    topics = Topic.query.all()
+    topic_of_choice = value
+    topic_subject = topic_of_choice
+    for topic in topics:
+        if topic.topicSubject == topic_of_choice:
+            topics_list.append(topic)
+        
+    sorted_topics_list = sorted(topics_list, key=lambda x: x.topicWeek)
+    
+    return render_template("student/student_class.html", topics_list=sorted_topics_list, topic_subject=topic_subject)
        
-@app.route("/reflection")
+@app.route("/reflection", methods =['GET', 'POST'])
 def reflection():
-    return render_template('student/sentiment_reflection.html')
+    form = studentReflectionForm()
+
+    if form.validate_on_submit():
+        input_reflection = [str(x) for x in request.form.values()]
+        input_prediction = input_reflection
+        print("new reflection:", input_reflection)
+        print("input_prediction:", input_prediction)
+        print('inputs', sentimental_model.inputs)
+        in_sensor= preprocess_input_data(str(input_prediction))
+
+        senti_prediction = sentimental_model.predict(in_sensor)[0]
+
+        class_index = np.argmax(senti_prediction)
+        print('class index', class_index)
+
+        if class_index == 1:
+            result = "Positive"
+        else:
+            result = "Negative"
+        print('sentiment:', result)
+        new_reflection=Reflection(id= randrange(0,999999999),
+                                    subjectName="Math",
+                                    topicName="Introduction to Algebra",
+                                    week=1,
+                                    studentEmail="testpred@mail.com",
+                                    reflection= str(input_reflection[-1]),
+                                    sentiment=result)
+        db.session.add(new_reflection)
+        db.session.commit()
+        return redirect(url_for('reflection_submitted'))
+    return render_template('student/sentiment_reflection.html', form=form)
+
+@app.route("/reflection-submitted")
+def reflection_submitted():
+    return render_template('student/reflection-submitted.html')
 
 
 # teacher routes------------------------
@@ -382,25 +473,7 @@ def preprocess_input_data(sentence):
     attention_mask = pad_sequences([attention_mask], maxlen=512, dtype="long", padding="post", truncating="post")
     return input_ids, attention_mask
 
-#@app.route("/prediction", methods=["POST"])
-#def prediction():
-#    new_reflection = [str(x) for x in request.form.values()]
-#    input_prediction = new_reflection
-#    print("new reflection:", new_reflection)
-#    print("input_prediction:", input_prediction)
-#    print('inputs', sentimental_model.inputs)
-#    in_sensor= preprocess_input_data(str(input_prediction))
-#
-#    senti_prediction = sentimental_model.predict(in_sensor)[0]
-#
-#    class_index = np.argmax(senti_prediction)
-#    print('class index', class_index)
-#
-#    if class_index == 1:
-#        result = "Positive Sentiment"
-#    else:
-#       result = "Negative Sentiment"
-#
-#    print('sentiment:', result)
-#
-#    return render_template('student/sentiment_reflection.html', prediction_text=result)
+@app.route("/prediction")
+def prediction():
+        return render_template('student/sentiment_reflection.html')
+

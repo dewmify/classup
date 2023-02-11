@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-{% import "bootstrap/wtf.html" as wtf %}
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Student's Reflection</title>
+  <title>Admin Dashboard</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -80,42 +79,63 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Student's Reflection</h2>
-              <p>This is a safe space for students to type out their thoughts about a specific class or module.</p>
+              <h2>Reflection Submitted!</h2>
             </div>
           </div>
         </div>
       </div>
-      <nav>
-        <div class="container">
-          <ol>
-            <li><a href="/student-index">Home</a></li>
-            <li><a href="/student-class">Mobile Application Project</a></li>
-            <li>Reflection</li>
-          </ol>
-        </div>
-      </nav>
     </div><!-- End Breadcrumbs -->
 
-    <section class="sample-page">
-      <div class="container" data-aos="fade-up">
-
-        <p>
-          <h6>Enter your reflection below:</h6> 
-          <i>Note: The reflections will not be shown to any other students and will only be accessed by educators & admins.</i> 
-        </p>
-     
-          <!-- Main Input For Receiving Query to our ML -->
-         <form action="/reflection"method="POST" class="form-student-reflection">
-            {{ form.hidden_tag() }}
-            <div class="form-group mt-3">
-              {{ wtf.form_field(form.reflection, placeholder="This class is....", size="100") }}
+   
+         <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="portfolio sections-bg">
+        <div class="container" data-aos="fade-up">
+  
+          <div class="section-header">
+          </div>
+  
+          <div class="portfolio-isotope" data-portfolio-filter="*" data-portfolio-layout="masonry" data-portfolio-sort="original-order" data-aos="fade-up" data-aos-delay="100">
+  
+            <!--<div>
+              <ul class="portfolio-flters">
+                <li data-filter="*" class="filter-active">All</li>
+                <li data-filter=".filter-app">App</li>
+                <li data-filter=".filter-product">Product</li>
+                <li data-filter=".filter-branding">Branding</li>
+                <li data-filter=".filter-books">Books</li>
+              </ul><!-- End Portfolio Filters -->
             </div>
-            <br>
-            <button type="submit" class="btn btn-primary btn-lg position-absolute bottom-0 end-0" style="background-color: #008374; color: white;">Submit</button>
-         </form>
-      </div>
-    </section>
+  
+            <div class="row gy-4 portfolio-container">
+  
+  
+              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
+                <div class="portfolio-wrap">
+                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
+                  <div class="portfolio-info">
+                    <h4><a href="/student-class" title="More Details">You have successfully logged in</a></h4>
+                    <p>Create student and teacher now</p>
+                  </div>
+                </div>
+              </div><!-- End Portfolio Item -->
+              <div class="col-xl-4 col-md-6 portfolio-item filter-product">
+                <div class="portfolio-wrap">
+                  <a href="/static/img/portfolio/product-2.jpg" data-gallery="portfolio-gallery-app" class="glightbox"><img src="/static/img/portfolio/product-2.jpg" class="img-fluid" alt=""></a>
+                  <div class="portfolio-info">
+                    <h4><a href="{{url_for('logout')}}" title="More Details">CLICK HERE TO LOGOUT</a></h4>
+                    <p>LOGOUT</p>
+                  </div>
+                </div>
+              </div><!-- End Portfolio Item -->
+  
+  
+            </div><!-- End Portfolio Container -->
+  
+          </div>
+  
+        </div>
+      </section><!-- End Portfolio Section -->
+
 
   </main><!-- End #main -->
 

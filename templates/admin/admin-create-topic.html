@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Student's Reflection</title>
+  <title>Register Student</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -55,13 +55,10 @@
           <li><a href="/">Home</a></li>
           <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
-              <li><a href="/student-index">Classes</a></li>
-              
-              <li><a href="#">Account</a></li>
-              <li><a href="#">Grades</a></li>
-            </ul>
+              <!--<li><a href="/student-index">Classes</a></li>-->
+
           </li>
-          <li><a href="#login">Welcome back, Max!</a></li>
+          <li><a href="/login">Login</a></li>
         </ul>
       </nav><!-- .navbar -->
 
@@ -80,43 +77,49 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Student's Reflection</h2>
-              <p>This is a safe space for students to type out their thoughts about a specific class or module.</p>
+              <h2>Create Student Credentials</h2>
             </div>
           </div>
         </div>
       </div>
-      <nav>
-        <div class="container">
-          <ol>
-            <li><a href="/student-index">Home</a></li>
-            <li><a href="/student-class">Mobile Application Project</a></li>
-            <li>Reflection</li>
-          </ol>
-        </div>
-      </nav>
     </div><!-- End Breadcrumbs -->
 
-    <section class="sample-page">
+    <section id="contact" class="contact">
       <div class="container" data-aos="fade-up">
-
-        <p>
-          <h6>Enter your reflection below:</h6> 
-          <i>Note: The reflections will not be shown to any other students and will only be accessed by educators & admins.</i> 
-        </p>
-     
-          <!-- Main Input For Receiving Query to our ML -->
-         <form action="/reflection"method="POST" class="form-student-reflection">
-            {{ form.hidden_tag() }}
-            <div class="form-group mt-3">
-              {{ wtf.form_field(form.reflection, placeholder="This class is....", size="100") }}
+        <div class="row gx-lg-0 gy-4">
+          <div class="col-lg-4">
+            <div class="info-container d-flex flex-column align-items-center justify-content-center">
+              <div class="info-item d-flex">
+                <i class="bi bi-person-add" flex-shrink-0"></i>
+                <div>
+                  <h4>To register a student:</h4>
+                  <p>Enter their information on the right.</p>
+                </div>
+              </div><!-- End Info Item -->
             </div>
-            <br>
-            <button type="submit" class="btn btn-primary btn-lg position-absolute bottom-0 end-0" style="background-color: #008374; color: white;">Submit</button>
-         </form>
-      </div>
-    </section>
+          </div>
 
+          <div class="col-lg-8">
+            <form action="/admin-create-topic" method="POST" class="form-admin-create-student">
+              <div class="row">
+                {{ form.hidden_tag() }}
+                <div class="form-group mt-3">
+                  {{ wtf.form_field(form.topicSubject) }}
+                </div>
+                <div class="form-group mt-3">
+                  {{ wtf.form_field(form.topicName) }}
+                </div>
+                <div class="form-group mt-3">
+                  {{ wtf.form_field(form.topicWeek, style="height: 50px;") }}
+                </div>
+              </div>
+              <br>
+              <div class="text-center"><button type="submit">Register</button></div>
+            </form>
+          </div><!-- End Contact Form -->
+        </div>
+      </div>
+    </section><!-- End Contact Section -->
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -125,7 +128,7 @@
     <div class="container">
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-info">
-          <a href="index.html" class="logo d-flex align-items-center">
+          <a href="/" class="logo d-flex align-items-center">
             <span>ClassUp</span>
           </a>
           <p>The only classroom platform that institutions need to cut down on unproductive time.</p>
