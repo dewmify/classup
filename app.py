@@ -65,6 +65,66 @@ hand_model = load_model('models/HandGestureModel.h5')
 #sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 # database class
+
+# class User(db.Model, UserMixin):
+#     __tablename__ = 'users'
+#     id = db.Column(db.Integer, nullable=False, primary_key=True)
+#     email = db.Column(db.String(100), unique=True, nullable=False)
+#     name = db.Column(db.String(45), nullable=False)
+#     password = db.Column(db.String(200), nullable=False)
+
+#     __mapper_args__ = {
+#         'polymorphic_identity': 'user',
+#         'polymorphic_on': type
+#     }
+
+#     def __init__(self, id, email, name, password):
+#          self.id = id
+#          self.email = email
+#          self.name = name
+#          self.password = password
+    
+
+
+
+# class Teacher(User):
+#     __tablename__ = 'teachers'
+#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
+#     teacherSubject = db.Column(db.String(45), nullable=False)
+
+#     __mapper_args__ = {
+#         'polymorphic_identity': 'teacher',
+#     }
+
+#     def __init__(self, id, name, email, password, teacherSubject):
+#         super().__init__(name, email, password, 'teacher')
+#         self.id = id
+#         self.teacherSubject = teacherSubject
+
+# class Student(User):
+#     __tablename__ = 'students'
+#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
+#     studentImage = db.Column(db.String(45), nullable=False)
+#     studentPresMath = db.Column(db.Integer, nullable=False)
+#     studentPresScience = db.Column(db.Integer, nullable=False)
+#     studentPresChinese = db.Column(db.Integer, nullable=False)
+#     studentPresEnglish = db.Column(db.Integer, nullable=False)
+#     studentisTaking = db.Column(db.Integer, nullable=False)
+
+#     __mapper_args__ = {
+#         'polymorphic_identity': 'student',
+#     }
+
+#     def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+#         super().__init__(name, email, password, 'student')
+#         self.id = id
+#         self.studentImage = studentImage
+#         self.studentPresMath = studentPresMath
+#         self.studentPresScience = studentPresScience
+#         self.studentPresChinese = studentPresChinese
+#         self.studentPresEnglish = studentPresEnglish
+#         self.studentisTaking = studentisTaking
+
 class Student(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
     studentEmail = db.Column(db.String(100), nullable=False)
@@ -98,6 +158,7 @@ class Admin(db.Model, UserMixin):
       self.id = id
       self.adminEmail = adminEmail
       self.adminPassword = adminPassword
+
 
 class Teacher(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)

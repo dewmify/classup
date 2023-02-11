@@ -9,6 +9,12 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
+  <style>
+    #slides {
+      text-align: center;
+    }
+  </style>
+
   <!-- Favicons -->
   <link href="/static/img/favicon.png" rel="icon">
   <link href="/static/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -51,14 +57,10 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="#hero">Home</a></li>
-          <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href=""></a></li>
-            </ul>
-          </li>
+          <li><a href="/">Home</a></li>
           {% if 'email' in session %}
-            <li class="dropdown"><a href="/teacher_dashboard"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+            <li><a href="/teacher_dashboard"><span>Your Dashboard</span></a></li>
+            <li class="dropdown"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
               <ul>
                 <li><a class="nav-link" href="/logout">Log Out</a></li>
               </ul>
@@ -71,7 +73,6 @@
 
         </ul>
       </nav><!-- .navbar -->
-
       <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
       <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
 
@@ -104,30 +105,9 @@
               <br>
               <p>No slides added yet.</p>
             {% else %}
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Title</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Author</th>
-                            <th scope="col">Subject</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in range(slidesList|length) %}
-                            <tr>
-                                <td>{{ slidesList[i].slidesId }}</td>
-                                <td><a href="{{url_for('slides', slidesId = slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
-                                <td>{{ slidesList[i].slidesDate }}</td>
-                                <td>{{ slidesList[i].slidesAuthor }}</td>
-                                <td>{{ slidesList[i].slidesSubject }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <p href="/slides_list">View Slides Here</p>
             {% endif %}
-            </section>
+          </section>
     
           <section id="subjects">
             <h2>Subjects</h2>
