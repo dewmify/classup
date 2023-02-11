@@ -142,14 +142,16 @@ class Slides(db.Model, UserMixin):
      slidesAuthor = db.Column(db.String(100), nullable = False)
      slidesSubject = db.Column(db.String(100), nullable = False)
      slidesLink = db.Column(db.String(1000), nullable = False)
+     teacherEmail = db.Column(db.String(100), db.ForeignKey('teacher.teacherEmail'))
 
-     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink):
+     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink, teacherEmail):
           self.slidesId = slidesId
           self.slidesName = slidesName
           self.slidesDate = slidesDate
           self.slidesAuthor = slidesAuthor
           self.slidesSubject = slidesSubject
           self.slidesLink = slidesLink
+          self.teacherEmail = teacherEmail
 
 with app.app_context():
     db.create_all()
@@ -212,8 +214,9 @@ def login():
 
 @app.route("/logout", methods=['GET', 'POST'])
 def logout():
+    session.pop('email', None)
     logout_user()
-    return redirect(url_for('login'))
+    return render_template("/index.html")
 
 #admin routes --------------------
 @app.route("/login-admin", methods =['GET', 'POST'])
@@ -223,6 +226,8 @@ def login_admin():
             admin = Admin.query.filter_by(adminEmail=form.adminEmail.data).first()
             if admin:
                 if admin.adminPassword == form.adminPass.data:
+                    email = admin.adminEmail
+                    session['email'] = email
                     login_user(admin)
                     return redirect(url_for('admin_dashboard'))
         return render_template("admin/admin-login.html", form=form)
@@ -278,6 +283,7 @@ def login_student():
             password = form.studentPass.data
             if student:
                 if bcrypt.check_password_hash(hashed_password, password):
+                    session['email'] = student.studentEmail
                     login_user(student)
                     return redirect(url_for('student_index'))
         return render_template("login_student.html", form=form)
@@ -305,6 +311,7 @@ def login_teacher():
             password = form.teacherPassword.data
             if teacher:
                 if bcrypt.check_password_hash(hashed_password, password):
+                    session['email'] = teacher.teacherEmail
                     login_user(teacher)
                     return redirect(url_for('teacher_dashboard'))
         return render_template("login_teacher.html", form=form)
@@ -313,8 +320,11 @@ def login_teacher():
 # teacher pages ---------------------------
 @app.route("/teacher_dashboard")
 def teacher_dashboard():
-    slidesList = Slides.query.all()
-    return render_template("teacher/teacher_dashboard.html", slidesList = slidesList)
+    if session['email'] != "":
+        slidesList = Slides.query.all()
+        return render_template("teacher/teacher_dashboard.html", slidesList = slidesList)
+    else:
+        return render_template("login_teacher.html")
     
 @app.route("/<int:slidesId>/")
 def slides(slidesId):
@@ -341,7 +351,8 @@ def addSlides():
                             slidesDate=form.slidesDate.data,
                             slidesAuthor=form.slidesAuthor.data,
                             slidesSubject=form.slidesSubject.data,
-                            slidesLink=form.slidesLink.data
+                            slidesLink=form.slidesLink.data,
+                            teacherEmail=session['email']
                             )
         db.session.add(new_slides)
         db.session.commit()

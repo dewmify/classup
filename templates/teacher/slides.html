@@ -4,11 +4,14 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-  <title>Student's Reflection</title>
+  <title>Slides</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
-
+  <style>
+  #slides {
+    text-align: center;
+  }  
+  </style>
   <!-- Favicons -->
   <link href="/static/img/favicon.png" rel="icon">
   <link href="/static/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -38,14 +41,17 @@
   <input type="hidden"  id="slidesSrc" value="{{ slides_src }}">
 
   <script>
-
-    var slides_src = document.querySelector('#slidesSrc').value
-
-    $( window ).on( "load", function() {
-      $("#slides").attr("src", slides_src)
-    });
+    
+    window.onload = function(){
+      var slides = document.getElementById('slides');
+      var slides_src = document.querySelector('#slidesSrc').value;
+      slides.src = slides_src;
+      alert(slides.src);
+    }
     
     function controlSlides() {
+      var slides_src = document.querySelector('#slidesSrc').value;
+
       fetch('http://127.0.0.1:5000/api/v1/handgesture') 
         .then((response) => {
           return response.json();
@@ -59,12 +65,12 @@
             switch (data.direction) {
               case 'left':
                 console.log("left")
-                document.getElementById("slides").contentWindow.postMessage("action=previous", "https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777");
+                document.getElementById("slides").contentWindow.postMessage("action=previous", slides_src);
                 break;
 
               case 'right':
                 console.log("right")
-                document.getElementById("slides").contentWindow.postMessage("action=next", "https://onedrive.live.com/embed?cid=E34C4380A0F5483C&amp;resid=E34C4380A0F5483C%213164&amp;authkey=AGefK0t8mUm3zJE&amp;em=2&amp;wdAr=1.7777777777777777");
+                document.getElementById("slides").contentWindow.postMessage("action=next", slides_src);
                 break;
 
               default:
@@ -97,18 +103,25 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/blog">Blog</a></li>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#about">About</a></li>
           <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
-              <li><a href="/reflections">Reflections</a></li>
-              
-              <li><a href="#">Account</a></li>
-              <li><a href="#">Grades</a></li>
+              <li><a href=""></a></li>
             </ul>
           </li>
-          <li><a href="#login">Welcome back, Max!</a></li>
+          {% if 'email' in session %}
+            <li class="dropdown"><a href="/teacher_dashboard"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+              <ul>
+                <li><a class="nav-link" href="/logout">Log Out</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li>
+              <a href="/login">Login</a>
+            </li>
+          {% endif %}
+
         </ul>
       </nav><!-- .navbar -->
 
@@ -127,7 +140,7 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Definitions & Evolution of AI</h2>
+              <h2>{{ slides.slidesName }}</h2>
             </div>
           </div>
         </div>
@@ -144,7 +157,7 @@
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
         <div>
-          <iframe id="slides" src="" width="1000px" height="600px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+          <iframe id="slides" src="" width="800px" height="400px" frameborder="0">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
           <!-- <button onclick="controlSlides()">Control Slides</button> -->
         </div>
       </div>
