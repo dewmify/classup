@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>[Template] Sample Inner Page</title>
+  <title>List of Slides</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -50,27 +50,20 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href="#">Drop Down 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-                <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
-                  <li><a href="#">Deep Drop Down 2</a></li>
-                  <li><a href="#">Deep Drop Down 3</a></li>
-                  <li><a href="#">Deep Drop Down 4</a></li>
-                  <li><a href="#">Deep Drop Down 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Drop Down 2</a></li>
-              <li><a href="#">Drop Down 3</a></li>
-              <li><a href="#">Drop Down 4</a></li>
-            </ul>
-          </li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="/">Home</a></li>
+          {% if 'email' in session %}
+            <li><a href="/teacher_dashboard"><span>Your Dashboard</span></a></li>
+            <li class="dropdown"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+              <ul>
+                <li><a class="nav-link" href="/logout">Log Out</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li>
+              <a href="/login">Login</a>
+            </li>
+          {% endif %}
+
         </ul>
       </nav><!-- .navbar -->
 
@@ -109,7 +102,7 @@
         <div class="viewAllSlides">
           <h3>List of Slides</h3>
           {% if slidesList == [] %}
-              <img src="" style="width: 15%; margin-left:42.5%;">
+              <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
               <br>
               <br>
               <p>No slides added yet.</p>
@@ -128,7 +121,7 @@
                       {% for i in range(slidesList|length) %}
                           <tr>
                               <td>{{ slidesList[i].slidesId }}</td>
-                              <td>{{ slidesList[i].slidesName }}</td>
+                              <td><a href="{{url_for('slides', slidesId = slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
                               <td>{{ slidesList[i].slidesDate }}</td>
                               <td>{{ slidesList[i].slidesAuthor }}</td>
                               <td>{{ slidesList[i].slidesSubject }}</td>

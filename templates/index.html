@@ -51,14 +51,21 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href=""></a></li>
-            </ul>
-          </li>
-          <li><a href="/login">Login</a></li>
+          <li><a href="/">Home</a></li>
+
+          {% if 'email' in session %}
+            <li><a href="/teacher_dashboard"><span>Your Dashboard</span></a></li>
+            <li class="dropdown"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+              <ul>
+                <li><a class="nav-link" href="/logout">Log Out</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li>
+              <a href="/login">Login</a>
+            </li>
+          {% endif %}
+
         </ul>
       </nav><!-- .navbar -->
 
@@ -133,6 +140,20 @@
 
   <main id="main">
 
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs">
+      <div class="page-header d-flex align-items-center" style="background-image: url('');">
+        <div class="container position-relative">
+          <div class="row d-flex justify-content-center">
+            <div class="col-lg-6 text-center">
+              <h2>Classes</h2>
+              <p>Classes you are enrolled it this semester.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Breadcrumbs -->
+    
     <!-- ======= About Us Section ======= -->
     <section id="about" class="about">
       <div class="container" data-aos="fade-up">
