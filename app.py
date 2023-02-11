@@ -127,7 +127,7 @@ class Teacher(User):
 class Student(User):
     __tablename__ = 'students'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
-    studentImage = db.Column(db.String(45), nullable=False)
+    studentImage = db.Column(db.String(45), nullable=True)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
     studentPresChinese = db.Column(db.Integer, nullable=False)
@@ -252,7 +252,7 @@ class adminCreateUserForm(FlaskForm):
     password= PasswordField('User Password', validators=[InputRequired()])
 
 class adminCreateStudentForm(adminCreateUserForm):
-    studentImage= StringField('Student Image', validators=[InputRequired()])
+    studentImage= StringField('Student Image')
     studentPresMath= HiddenField('presentmath')
     studentPresScience= HiddenField('presentsci')
     studentPresChinese= HiddenField('presentchi')
@@ -325,11 +325,11 @@ def admin_dashboard():
 def admin_create_student():
         form = adminCreateStudentForm(request.values, studentPresMath=1, studentPresScience=1, studentPresChinese=1, studentPresEnglish=1, studentisTaking=1)
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.studentPassword.data)
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
             new_student = Student(id=randrange(0,999999999),
-                                    studentName=form.studentName.data,
-                                    studentEmail=form.studentEmail.data, 
-                                    studentPassword=hashed_password,
+                                    name=form.name.data,
+                                    email=form.email.data,
+                                    password=hashed_password,
                                     studentImage=form.studentImage.data, 
                                     studentPresMath=form.studentPresMath.data,
                                     studentPresScience=form.studentPresScience.data,
@@ -339,10 +339,10 @@ def admin_create_student():
             db.session.add(new_student)
             db.session.commit()
             # Retrieve the newly created student
-            student = Student.query.filter_by(studentName=form.studentName.data).first()
+            student = Student.query.filter_by(email=form.email.data).first()
             
             # Obtain the student id
-            student_id = student.id
+            student_id = student.id 
             return redirect(url_for('onboard',student_id=student_id))
         return render_template("admin/admin-create-student.html", form=form)
 
@@ -491,24 +491,6 @@ def get_handgesture():
     direction = controlSlides()
     return json.dumps({'direction': direction})
          
-
-@app.route("/addSlides", methods=["POST"])
-def addSlides():
-    values = request.form.getlist("value")
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="test"
-    )
-    cursor = conn.cursor()
-    sql = "INSERT INTO slides (value) VALUES (%s)"
-    cursor.executemany(sql, [(value,) for value in values])
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Slides uploaded successfully!"  
-
 
 
 # def gen_frames():  
