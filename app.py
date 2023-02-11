@@ -66,70 +66,45 @@ hand_model = load_model('models/HandGestureModel.h5')
 
 # database class
 
-# class User(db.Model, UserMixin):
-#     __tablename__ = 'users'
-#     id = db.Column(db.Integer, nullable=False, primary_key=True)
-#     email = db.Column(db.String(100), unique=True, nullable=False)
-#     name = db.Column(db.String(45), nullable=False)
-#     password = db.Column(db.String(200), nullable=False)
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(45), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    type = db.Column(db.String(50), nullable=False)
 
-#     __mapper_args__ = {
-#         'polymorphic_identity': 'user',
-#         'polymorphic_on': type
-#     }
+    __mapper_args__ = {
+        'polymorphic_identity': 'user',
+        'polymorphic_on': type
+    }
 
-#     def __init__(self, id, email, name, password):
-#          self.id = id
-#          self.email = email
-#          self.name = name
-#          self.password = password
+    def __init__(self, id, email, name, password):
+         self.id = id
+         self.email = email
+         self.name = name
+         self.password = password
     
 
 
 
-# class Teacher(User):
-#     __tablename__ = 'teachers'
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
-#     teacherSubject = db.Column(db.String(45), nullable=False)
+class Teacher(User):
+    __tablename__ = 'teachers'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
+    teacherSubject = db.Column(db.String(45), nullable=False)
 
-#     __mapper_args__ = {
-#         'polymorphic_identity': 'teacher',
-#     }
+    __mapper_args__ = {
+        'polymorphic_identity': 'teacher',
+    }
 
-#     def __init__(self, id, name, email, password, teacherSubject):
-#         super().__init__(name, email, password, 'teacher')
-#         self.id = id
-#         self.teacherSubject = teacherSubject
+    def __init__(self, id, name, email, password, teacherSubject):
+        super().__init__(name, email, password, 'teacher')
+        self.id = id
+        self.teacherSubject = teacherSubject
 
-# class Student(User):
-#     __tablename__ = 'students'
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
-#     studentImage = db.Column(db.String(45), nullable=False)
-#     studentPresMath = db.Column(db.Integer, nullable=False)
-#     studentPresScience = db.Column(db.Integer, nullable=False)
-#     studentPresChinese = db.Column(db.Integer, nullable=False)
-#     studentPresEnglish = db.Column(db.Integer, nullable=False)
-#     studentisTaking = db.Column(db.Integer, nullable=False)
-
-#     __mapper_args__ = {
-#         'polymorphic_identity': 'student',
-#     }
-
-#     def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
-#         super().__init__(name, email, password, 'student')
-#         self.id = id
-#         self.studentImage = studentImage
-#         self.studentPresMath = studentPresMath
-#         self.studentPresScience = studentPresScience
-#         self.studentPresChinese = studentPresChinese
-#         self.studentPresEnglish = studentPresEnglish
-#         self.studentisTaking = studentisTaking
-
-class Student(db.Model, UserMixin):
-    id = db.Column(db.Integer, nullable=False, primary_key=True)
-    studentEmail = db.Column(db.String(100), nullable=False)
-    studentName = db.Column(db.String(45), nullable=False)
-    studentPassword = db.Column(db.String(200), nullable=False)
+class Student(User):
+    __tablename__ = 'students'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
     studentImage = db.Column(db.String(45), nullable=False)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
@@ -137,17 +112,43 @@ class Student(db.Model, UserMixin):
     studentPresEnglish = db.Column(db.Integer, nullable=False)
     studentisTaking = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+    __mapper_args__ = {
+        'polymorphic_identity': 'student',
+    }
+
+    def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+        super().__init__(name, email, password, 'student')
         self.id = id
-        self.studentName = studentName
-        self.studentEmail = studentEmail
-        self.studentPassword = studentPassword
         self.studentImage = studentImage
         self.studentPresMath = studentPresMath
         self.studentPresScience = studentPresScience
         self.studentPresChinese = studentPresChinese
         self.studentPresEnglish = studentPresEnglish
         self.studentisTaking = studentisTaking
+
+# class Student(db.Model, UserMixin):
+#     id = db.Column(db.Integer, nullable=False, primary_key=True)
+#     studentEmail = db.Column(db.String(100), nullable=False)
+#     studentName = db.Column(db.String(45), nullable=False)
+#     studentPassword = db.Column(db.String(200), nullable=False)
+#     studentImage = db.Column(db.String(45), nullable=False)
+#     studentPresMath = db.Column(db.Integer, nullable=False)
+#     studentPresScience = db.Column(db.Integer, nullable=False)
+#     studentPresChinese = db.Column(db.Integer, nullable=False)
+#     studentPresEnglish = db.Column(db.Integer, nullable=False)
+#     studentisTaking = db.Column(db.Integer, nullable=False)
+
+#     def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+#         self.id = id
+#         self.studentName = studentName
+#         self.studentEmail = studentEmail
+#         self.studentPassword = studentPassword
+#         self.studentImage = studentImage
+#         self.studentPresMath = studentPresMath
+#         self.studentPresScience = studentPresScience
+#         self.studentPresChinese = studentPresChinese
+#         self.studentPresEnglish = studentPresEnglish
+#         self.studentisTaking = studentisTaking
 
 class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
@@ -160,19 +161,19 @@ class Admin(db.Model, UserMixin):
       self.adminPassword = adminPassword
 
 
-class Teacher(db.Model, UserMixin):
-    id = db.Column(db.Integer, nullable=False, primary_key=True)
-    teacherName = db.Column(db.String(100), nullable=False)
-    teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
-    teacherPassword = db.Column(db.String(100), nullable=False)
-    teacherSubject = db.Column(db.String(45), nullable=False)
+# class Teacher(db.Model, UserMixin):
+#     id = db.Column(db.Integer, nullable=False, primary_key=True)
+#     teacherName = db.Column(db.String(100), nullable=False)
+#     teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
+#     teacherPassword = db.Column(db.String(100), nullable=False)
+#     teacherSubject = db.Column(db.String(45), nullable=False)
 
-    def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
-        self.id = id
-        self.teacherName = teacherName
-        self.teacherEmail = teacherEmail
-        self.teacherPassword = teacherPassword
-        self.teacherSubject = teacherSubject
+#     def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
+#         self.id = id
+#         self.teacherName = teacherName
+#         self.teacherEmail = teacherEmail
+#         self.teacherPassword = teacherPassword
+#         self.teacherSubject = teacherSubject
 
 class Subject(db.Model, UserMixin):
     name = db.Column(db.String(100), primary_key=True)
@@ -222,11 +223,13 @@ with app.app_context():
 # forms
 
 # admin forms
-class adminCreateStudentForm(FlaskForm):
-    id= HiddenField('id')
-    studentName= StringField('Student Name', validators=[InputRequired()])
-    studentEmail= StringField('Student Email', validators=[InputRequired()])
-    studentPassword= PasswordField('Student Password', validators=[InputRequired()])
+class adminCreateUserForm(FlaskForm):
+    id = HiddenField('id')
+    name = StringField('User Name', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
+
+class adminCreateStudentForm(adminCreateUserForm):
     studentImage= StringField('Student Image', validators=[InputRequired()])
     studentPresMath= HiddenField('presentmath')
     studentPresScience= HiddenField('presentsci')
@@ -234,11 +237,7 @@ class adminCreateStudentForm(FlaskForm):
     studentPresEnglish= HiddenField('presenteng')
     studentisTaking= HiddenField('istaking')
 
-class adminCreateTeacherForm(FlaskForm):
-    id= HiddenField('id')
-    teacherName= StringField('Teacher Name', validators=[InputRequired()])
-    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
-    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+class adminCreateTeacherForm(adminCreateUserForm):
     teacherSubject= StringField('Teacher Subject', validators=[InputRequired()])
 
 # login forms
@@ -247,12 +246,12 @@ class adminLoginForm(FlaskForm):
     adminPass= PasswordField('Admin Password', validators=[InputRequired()])
 
 class studLoginForm(FlaskForm):
-    studentEmail= StringField('Student Email', validators=[InputRequired()])
-    studentPass= PasswordField('Student Password', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
 
 class teachLoginForm(FlaskForm):
-    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
-    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
 
 #add slides form
 class addSlidesForm(FlaskForm):
