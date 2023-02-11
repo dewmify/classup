@@ -24,7 +24,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
 from random import randrange
 
@@ -62,14 +62,49 @@ db.init_app(app)
 # ai models
 
 hand_model = load_model('models/HandGestureModel.h5')
-sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
+#sentimental_model = load_model('models/sentiment_model.h5', custom_objects={"TFBertModel": transformers.TFBertModel})
 
 # database class
-class Student(db.Model, UserMixin):
+
+class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, nullable=False, primary_key=True)
-    studentEmail = db.Column(db.String(100), nullable=False)
-    studentName = db.Column(db.String(45), nullable=False)
-    studentPassword = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(45), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    type = db.Column(db.String(50), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'user',
+        'polymorphic_on': type
+    }
+
+    def __init__(self, id, email, name, password):
+         self.id = id
+         self.email = email
+         self.name = name
+         self.password = password
+    
+
+
+
+class Teacher(User):
+    __tablename__ = 'teachers'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
+    teacherSubject = db.Column(db.String(45), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'teacher',
+    }
+
+    def __init__(self, id, name, email, password, teacherSubject):
+        super().__init__(name, email, password, 'teacher')
+        self.id = id
+        self.teacherSubject = teacherSubject
+
+class Student(User):
+    __tablename__ = 'students'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
     studentImage = db.Column(db.String(45), nullable=False)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
@@ -77,17 +112,43 @@ class Student(db.Model, UserMixin):
     studentPresEnglish = db.Column(db.Integer, nullable=False)
     studentisTaking = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+    __mapper_args__ = {
+        'polymorphic_identity': 'student',
+    }
+
+    def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+        super().__init__(name, email, password, 'student')
         self.id = id
-        self.studentName = studentName
-        self.studentEmail = studentEmail
-        self.studentPassword = studentPassword
         self.studentImage = studentImage
         self.studentPresMath = studentPresMath
         self.studentPresScience = studentPresScience
         self.studentPresChinese = studentPresChinese
         self.studentPresEnglish = studentPresEnglish
         self.studentisTaking = studentisTaking
+
+# class Student(db.Model, UserMixin):
+#     id = db.Column(db.Integer, nullable=False, primary_key=True)
+#     studentEmail = db.Column(db.String(100), nullable=False)
+#     studentName = db.Column(db.String(45), nullable=False)
+#     studentPassword = db.Column(db.String(200), nullable=False)
+#     studentImage = db.Column(db.String(45), nullable=False)
+#     studentPresMath = db.Column(db.Integer, nullable=False)
+#     studentPresScience = db.Column(db.Integer, nullable=False)
+#     studentPresChinese = db.Column(db.Integer, nullable=False)
+#     studentPresEnglish = db.Column(db.Integer, nullable=False)
+#     studentisTaking = db.Column(db.Integer, nullable=False)
+
+#     def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+#         self.id = id
+#         self.studentName = studentName
+#         self.studentEmail = studentEmail
+#         self.studentPassword = studentPassword
+#         self.studentImage = studentImage
+#         self.studentPresMath = studentPresMath
+#         self.studentPresScience = studentPresScience
+#         self.studentPresChinese = studentPresChinese
+#         self.studentPresEnglish = studentPresEnglish
+#         self.studentisTaking = studentisTaking
 
 class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
@@ -99,19 +160,20 @@ class Admin(db.Model, UserMixin):
       self.adminEmail = adminEmail
       self.adminPassword = adminPassword
 
-class Teacher(db.Model, UserMixin):
-    id = db.Column(db.Integer, nullable=False, primary_key=True)
-    teacherName = db.Column(db.String(100), nullable=False)
-    teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
-    teacherPassword = db.Column(db.String(100), nullable=False)
-    teacherSubject = db.Column(db.String(45), nullable=False)
 
-    def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
-        self.id = id
-        self.teacherName = teacherName
-        self.teacherEmail = teacherEmail
-        self.teacherPassword = teacherPassword
-        self.teacherSubject = teacherSubject
+# class Teacher(db.Model, UserMixin):
+#     id = db.Column(db.Integer, nullable=False, primary_key=True)
+#     teacherName = db.Column(db.String(100), nullable=False)
+#     teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
+#     teacherPassword = db.Column(db.String(100), nullable=False)
+#     teacherSubject = db.Column(db.String(45), nullable=False)
+
+#     def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
+#         self.id = id
+#         self.teacherName = teacherName
+#         self.teacherEmail = teacherEmail
+#         self.teacherPassword = teacherPassword
+#         self.teacherSubject = teacherSubject
 
 class Subject(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
@@ -153,6 +215,24 @@ class Reflection(db.Model, UserMixin):
         self.reflection = reflection
         self.sentiment = sentiment
 
+class Slides(db.Model, UserMixin):
+     slidesId = db.Column(db.Integer, primary_key=True)
+     slidesName = db.Column(db.String(100), nullable = False)
+     slidesDate = db.Column(db.Date, nullable = False)
+     slidesAuthor = db.Column(db.String(100), nullable = False)
+     slidesSubject = db.Column(db.String(100), nullable = False)
+     slidesLink = db.Column(db.String(1000), nullable = False)
+     teacherEmail = db.Column(db.String(100), db.ForeignKey('teacher.teacherEmail'))
+
+     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink, teacherEmail):
+          self.slidesId = slidesId
+          self.slidesName = slidesName
+          self.slidesDate = slidesDate
+          self.slidesAuthor = slidesAuthor
+          self.slidesSubject = slidesSubject
+          self.slidesLink = slidesLink
+          self.teacherEmail = teacherEmail
+
 with app.app_context():
     db.create_all()
     db.session.commit()
@@ -161,11 +241,13 @@ with app.app_context():
 # forms
 
 # admin forms
-class adminCreateStudentForm(FlaskForm):
-    id= HiddenField('id')
-    studentName= StringField('Student Name', validators=[InputRequired()])
-    studentEmail= StringField('Student Email', validators=[InputRequired()])
-    studentPassword= PasswordField('Student Password', validators=[InputRequired()])
+class adminCreateUserForm(FlaskForm):
+    id = HiddenField('id')
+    name = StringField('User Name', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
+
+class adminCreateStudentForm(adminCreateUserForm):
     studentImage= StringField('Student Image', validators=[InputRequired()])
     studentPresMath= HiddenField('presentmath')
     studentPresScience= HiddenField('presentsci')
@@ -173,11 +255,7 @@ class adminCreateStudentForm(FlaskForm):
     studentPresEnglish= HiddenField('presenteng')
     studentisTaking= HiddenField('istaking')
 
-class adminCreateTeacherForm(FlaskForm):
-    id= HiddenField('id')
-    teacherName= StringField('Teacher Name', validators=[InputRequired()])
-    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
-    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+class adminCreateTeacherForm(adminCreateUserForm):
     teacherSubject= StringField('Teacher Subject', validators=[InputRequired()])
     
 class adminCreateTopicForm(FlaskForm):
@@ -193,12 +271,12 @@ class adminLoginForm(FlaskForm):
     adminPass= PasswordField('Admin Password', validators=[InputRequired()])
 
 class studLoginForm(FlaskForm):
-    studentEmail= StringField('Student Email', validators=[InputRequired()])
-    studentPass= PasswordField('Student Password', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
 
 class teachLoginForm(FlaskForm):
-    teacherEmail= StringField('Teacher Email', validators=[InputRequired()])
-    teacherPassword= PasswordField('Teacher Password', validators=[InputRequired()])
+    email= StringField('User Email', validators=[InputRequired()])
+    password= PasswordField('User Password', validators=[InputRequired()])
 
 #reflection form
 class studentReflectionForm(FlaskForm):
@@ -210,6 +288,14 @@ class studentReflectionForm(FlaskForm):
     reflection= StringField('', validators=[InputRequired()])
     sentiment=HiddenField('sentiment')
 
+#add slides form
+class addSlidesForm(FlaskForm):
+     slidesId = HiddenField('slidesId')
+     slidesName = StringField('Slides Name', validators=[InputRequired()])
+     slidesDate = DateField('Slides Date', validators=[InputRequired()])
+     slidesAuthor = StringField('Slides Author', validators=[InputRequired()])
+     slidesSubject = StringField('Slides Subject', validators=[InputRequired()])
+     slidesLink = StringField("Slides Link (Embed Link from OneDrive)", validators=[InputRequired()])
 
 # routes
 
@@ -223,8 +309,9 @@ def login():
 
 @app.route("/logout", methods=['GET', 'POST'])
 def logout():
+    session.pop('email', None)
     logout_user()
-    return redirect(url_for('login'))
+    return render_template("/index.html")
 
 #admin routes --------------------
 @app.route("/login-admin", methods =['GET', 'POST'])
@@ -234,6 +321,8 @@ def login_admin():
             admin = Admin.query.filter_by(adminEmail=form.adminEmail.data).first()
             if admin:
                 if admin.adminPassword == form.adminPass.data:
+                    email = admin.adminEmail
+                    session['email'] = email
                     login_user(admin)
                     return redirect(url_for('admin_dashboard'))
         return render_template("admin/admin-login.html", form=form)
@@ -302,6 +391,7 @@ def login_student():
             password = form.studentPass.data
             if student:
                 if bcrypt.check_password_hash(hashed_password, password):
+                    session['email'] = student.studentEmail
                     login_user(student)
                     return redirect(url_for('student_index'))
         return render_template("login_student.html", form=form)
@@ -328,34 +418,34 @@ def student_classes(value):
 def reflection():
     form = studentReflectionForm()
 
-    if form.validate_on_submit():
-        input_reflection = [str(x) for x in request.form.values()]
-        input_prediction = input_reflection
-        print("new reflection:", input_reflection)
-        print("input_prediction:", input_prediction)
-        print('inputs', sentimental_model.inputs)
-        in_sensor= preprocess_input_data(str(input_prediction))
-
-        senti_prediction = sentimental_model.predict(in_sensor)[0]
-
-        class_index = np.argmax(senti_prediction)
-        print('class index', class_index)
-
-        if class_index == 1:
-            result = "Positive"
-        else:
-            result = "Negative"
-        print('sentiment:', result)
-        new_reflection=Reflection(id= randrange(0,999999999),
-                                    subjectName="Math",
-                                    topicName="Introduction to Algebra",
-                                    week=1,
-                                    studentEmail="testpred@mail.com",
-                                    reflection= str(input_reflection[-1]),
-                                    sentiment=result)
-        db.session.add(new_reflection)
-        db.session.commit()
-        return redirect(url_for('reflection_submitted'))
+    #if form.validate_on_submit():
+    #    input_reflection = [str(x) for x in request.form.values()]
+    #    input_prediction = input_reflection
+    #    print("new reflection:", input_reflection)
+    #    print("input_prediction:", input_prediction)
+    #    print('inputs', sentimental_model.inputs)
+    #    in_sensor= preprocess_input_data(str(input_prediction))
+#
+    #    senti_prediction = sentimental_model.predict(in_sensor)[0]
+#
+    #    class_index = np.argmax(senti_prediction)
+    #    print('class index', class_index)
+#
+    #    if class_index == 1:
+    #        result = "Positive"
+    #    else:
+    #        result = "Negative"
+    #    print('sentiment:', result)
+    #    new_reflection=Reflection(id= randrange(0,999999999),
+    #                                subjectName="Math",
+    #                                topicName="Introduction to Algebra",
+    #                                week=1,
+    #                                studentEmail="testpred@mail.com",
+    #                                reflection= str(input_reflection[-1]),
+    #                                sentiment=result)
+    #    db.session.add(new_reflection)
+    #    db.session.commit()
+    #    return redirect(url_for('reflection_submitted'))
     return render_template('student/sentiment_reflection.html', form=form)
 
 @app.route("/reflection-submitted")
@@ -373,37 +463,55 @@ def login_teacher():
             password = form.teacherPassword.data
             if teacher:
                 if bcrypt.check_password_hash(hashed_password, password):
+                    session['email'] = teacher.teacherEmail
                     login_user(teacher)
                     return redirect(url_for('teacher_dashboard'))
         return render_template("login_teacher.html", form=form)
 
-@app.route("/teacher-dashboard")
+
+# teacher pages ---------------------------
+@app.route("/teacher_dashboard")
 def teacher_dashboard():
-    return render_template("teacher/teacher-dashboard.html")
+    if session['email'] != "":
+        slidesList = Slides.query.all()
+        return render_template("teacher/teacher_dashboard.html", slidesList = slidesList)
+    else:
+        return render_template("login_teacher.html")
     
-@app.route("/slides")
-def slides():
-    return render_template("slides.html")
+@app.route("/<int:slidesId>/")
+def slides(slidesId):
+    slides = Slides.query.get_or_404(slidesId)
+    return render_template("teacher/slides.html", slides = slides)
 
 @app.route("/slides_list")
 def slides_list():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="test"
-    )
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM slides")
-    values = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('teacher/slides_list.html', values = values)
+    slidesList = Slides.query.all()      
+    return render_template('teacher/slides_list.html', slidesList = slidesList)
 
 @app.route("/account")
 def account():
     return render_template('account.html')
 
+
+@app.route("/addSlides", methods=["GET", "POST"])
+def addSlides():
+    form = addSlidesForm(request.values)
+    if form.validate_on_submit():
+        new_slides = Slides(
+                            slidesId = form.slidesId.data,
+                            slidesName=form.slidesName.data,
+                            slidesDate=form.slidesDate.data,
+                            slidesAuthor=form.slidesAuthor.data,
+                            slidesSubject=form.slidesSubject.data,
+                            slidesLink=form.slidesLink.data,
+                            teacherEmail=session['email']
+                            )
+        db.session.add(new_slides)
+        db.session.commit()
+        return redirect(url_for('slides_list'))
+    return render_template("teacher/add_slides.html", form=form)
+
+#joshua model-----------------------------------------
 def controlSlides():
     video = cv2.VideoCapture(0)
     
@@ -436,7 +544,6 @@ def controlSlides():
     video.release()
     return direction
 
-
 @app.route("/controlSlides_feed")
 def controlSlides_feed():
     return Response(controlSlides(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -445,23 +552,8 @@ def controlSlides_feed():
 def get_handgesture():
     direction = controlSlides()
     return json.dumps({'direction': direction})
+         
 
-@app.route("/addSlides", methods=["POST"])
-def addSlides():
-    values = request.form.getlist("value")
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="test"
-    )
-    cursor = conn.cursor()
-    sql = "INSERT INTO slides (value) VALUES (%s)"
-    cursor.executemany(sql, [(value,) for value in values])
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Slides uploaded successfully!"    
 
 
 # max model
