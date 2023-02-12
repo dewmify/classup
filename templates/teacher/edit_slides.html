@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+  {% import "bootstrap/wtf.html" as wtf %}
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>List of Slides</title>
+  <title>[Template] Sample Inner Page</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -82,7 +83,7 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>List of Slides</h2>
+              <h2>Add Slides</h2>
             </div>
           </div>
         </div>
@@ -90,54 +91,56 @@
       <nav>
         <div class="container">
           <ol>
-            <li><a href="/teacher_dashboard">Teacher Dashboard</a></li>
-            <li>List of Slides</li>
+            <li><a href="index.html">Home</a></li>
+            <li>Add Slides</li>
           </ol>
         </div>
       </nav>
     </div><!-- End Breadcrumbs -->
 
-    <section class="sample-page">
+    <section id="contact" class="contact">
       <div class="container" data-aos="fade-up">
-        <div class="viewAllSlides">
-          <h3>List of Slides</h3>
-          {% if slidesList == [] %}
-              <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
-              <br>
-              <br>
-              <p>No slides added yet.</p>
-          {% else %}
-              <table class="table">
-                  <thead>
-                      <tr>
-                          <th scope="col">ID</th>
-                          <th scope="col">Title</th>
-                          <th scope="col">Date</th>
-                          <th scope="col">Author</th>
-                          <th scope="col">Subject</th>
-                          <th scope="col">Actions</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      {% for i in range(slidesList|length) %}
-                          <tr>
-                              <td>{{ slidesList[i].slidesId }}</td>
-                              <td><a href="{{url_for('slides', slidesId = slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
-                              <td>{{ slidesList[i].slidesDate }}</td>
-                              <td>{{ slidesList[i].slidesAuthor }}</td>
-                              <td>{{ slidesList[i].slidesSubject }}</td>
-                              <td>
-                                  <a href="{{ url_for('editSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-primary">Edit</a>
-                                  <a href="{{ url_for('deleteSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-danger">Delete</a>
-                              </td>
-                          </tr>
-                      {% endfor %}
-                  </tbody>
-              </table>
-          {% endif %}
+        <div class="row gx-lg-0 gy-4">
+          <div class="col-lg-4">
+            <div class="info-container d-flex flex-column align-items-center justify-content-center">
+              <div class="info-item d-flex">
+                <i class="bi bi-person-add" flex-shrink-0"></i>
+                <div>
+                  <h4>To add slides:</h4>
+                  <p>Enter the information on the right.</p>
+                </div>
+              </div><!-- End Info Item -->
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <form action="/editSlides/{{ slides.slidesId }}" method="POST" class="form-admin-create-student">
+                <div class="row">
+                  {{ form.hidden_tag() }}
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesName) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesDate) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesAuthor) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesSubject) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesLink) }}
+                  </div>
+                </div>
+                <br>
+                <div class="text-center"><button type="submit">Submit Changes</button></div>
+              </form>
+  
+          </div><!-- End Contact Form -->
         </div>
       </div>
-    </section>
+    </section><!-- End Contact Section -->
 
   </main><!-- End #main -->
 

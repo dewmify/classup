@@ -424,6 +424,34 @@ def addSlides():
         return redirect(url_for('slides_list'))
     return render_template("teacher/add_slides.html", form=form)
 
+@app.route("/editSlides/<int:slidesId>", methods=["GET", "POST"])
+def editSlides(slidesId):
+    form = addSlidesForm(request.values)
+    slides = Slides.query.filter_by(slidesId=slidesId).first()
+    if form.validate_on_submit():
+        slides.slidesId = form.slidesId.data
+        slides.slidesName = form.slidesName.data
+        slides.slidesDate = form.slidesDate.data
+        slides.slidesAuthor = form.slidesAuthor.data
+        slides.slidesSubject = form.slidesSubject.data
+        slides.slidesLink = form.slidesLink.data
+        db.session.commit()
+        return redirect(url_for('slides_list'))
+    form.slidesId.data = slides.slidesId
+    form.slidesName.data = slides.slidesName
+    form.slidesDate.data = slides.slidesDate
+    form.slidesAuthor.data = slides.slidesAuthor
+    form.slidesSubject.data = slides.slidesSubject
+    form.slidesLink.data = slides.slidesLink
+    return render_template("teacher/edit_slides.html", form=form, slides = slides)
+
+@app.route("/deleteSlides/<int:slidesId>", methods=["GET", "POST"])
+def deleteSlides(slidesId):
+    slides = Slides.query.filter_by(slidesId=slidesId).first()
+    db.session.delete(slides)
+    db.session.commit()
+    return redirect(url_for('slides_list'))
+
 #joshua model-----------------------------------------
 def controlSlides():
     video = cv2.VideoCapture(0)

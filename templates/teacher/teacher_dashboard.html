@@ -10,7 +10,21 @@
   <meta content="" name="keywords">
 
   <style>
-    #slides {
+    
+    .button {
+      background-color: #008374; 
+      border: none;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+     }
+
+    #main {
       text-align: center;
     }
   </style>
@@ -83,14 +97,13 @@
     <div class="container" data-aos="fade-up">
       <main id="main">
         <h3>Teacher's Dashboard</h3>
-        <nav>
-          <ul>
-            <li><a href="#classes">View Classes</a></li>
-            <li><a href="#slides">View Slides</a></li>
-            <li><a href="#subjects">View Subjects</a></li>
-          </ul>
-        </nav>
-    
+        <section id="dashboard_nav">
+          <nav>
+              <button><a href="#classes">View Classes</a></button>
+              <button><a href="#slides">View Slides</a></button>
+              <button><a href="#subjects">View Subjects</a></button>
+          </nav>
+        </section>
         <main>
           <section id="classes">
             <h2>Classes</h2>
@@ -107,6 +120,7 @@
             {% else %}
                 <p><a href="/slides_list">View Slides Here</a></p>
             {% endif %}
+            <p><a href="/addSlides">Add Slides</a></p>
           </section>
     
           <section id="subjects">
