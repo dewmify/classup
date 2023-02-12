@@ -88,7 +88,7 @@ def allowed_file(filename):
 
 # database class
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, nullable=False, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -101,11 +101,12 @@ class User(db.Model):
         'polymorphic_on': type
     }
 
-    def __init__(self, id, email, name, password):
-         self.id = id
-         self.email = email
-         self.name = name
-         self.password = password
+    def __init__(self, id, email, name, password, type):
+        self.id = id
+        self.email = email
+        self.name = name
+        self.password = password
+        self.type = type
     
 
 
@@ -119,9 +120,8 @@ class Teacher(User):
         'polymorphic_identity': 'teacher',
     }
 
-    def __init__(self, id, name, email, password, teacherSubject):
-        super().__init__(name, email, password, 'teacher')
-        self.id = id
+    def __init__(self, id, email, name, password, teacherSubject):
+        super().__init__(id, email, name, password, 'teacher')
         self.teacherSubject = teacherSubject
 
 class Student(User):
@@ -139,7 +139,7 @@ class Student(User):
     }
 
     def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
-        super().__init__(name, email, password, 'student')
+        super().__init__(id, name, email, password, 'student')
         self.id = id
         self.studentImage = studentImage
         self.studentPresMath = studentPresMath
@@ -226,16 +226,16 @@ class Slides(db.Model, UserMixin):
      slidesAuthor = db.Column(db.String(100), nullable = False)
      slidesSubject = db.Column(db.String(100), nullable = False)
      slidesLink = db.Column(db.String(1000), nullable = False)
-     teacherEmail = db.Column(db.String(100), db.ForeignKey('teacher.teacherEmail'))
+     email = db.Column(db.String(100), db.ForeignKey('users.email'))
 
-     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink, teacherEmail):
+     def __init__(self, slidesId, slidesName, slidesDate, slidesAuthor, slidesSubject, slidesLink, email):
           self.slidesId = slidesId
           self.slidesName = slidesName
           self.slidesDate = slidesDate
           self.slidesAuthor = slidesAuthor
           self.slidesSubject = slidesSubject
           self.slidesLink = slidesLink
-          self.teacherEmail = teacherEmail
+          self.email = email
 
 with app.app_context():
     db.create_all()
@@ -250,6 +250,7 @@ class adminCreateUserForm(FlaskForm):
     name = StringField('User Name', validators=[InputRequired()])
     email= StringField('User Email', validators=[InputRequired()])
     password= PasswordField('User Password', validators=[InputRequired()])
+    type = HiddenField('type')
 
 class adminCreateStudentForm(adminCreateUserForm):
     studentImage= StringField('Student Image')
@@ -291,7 +292,11 @@ class onboardForm(FlaskForm):
 
 @app.route("/")
 def home():
-        return render_template("index.html")
+        if 'id' in session:
+            user = User.query.get(session['id'])
+            return render_template('index.html', user=user)
+        else:
+            return render_template("index.html")
 
 @app.route("/login")
 def login():
@@ -328,7 +333,7 @@ def admin_create_student():
             hashed_password = bcrypt.generate_password_hash(form.password.data)
             new_student = Student(id=randrange(0,999999999),
                                     name=form.name.data,
-                                    email=form.email.data,
+                                    email=form.email.data, 
                                     password=hashed_password,
                                     studentImage=form.studentImage.data, 
                                     studentPresMath=form.studentPresMath.data,
@@ -350,11 +355,11 @@ def admin_create_student():
 def admin_create_teacher():
         form = adminCreateTeacherForm()
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.teacherPassword.data)
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
             new_teacher = Teacher(id= randrange(0,999999999),
-                                    teacherName=form.teacherName.data,
-                                    teacherEmail=form.teacherEmail.data,
-                                    teacherPassword=hashed_password,
+                                    name=form.name.data,
+                                    email=form.email.data,
+                                    password=hashed_password,
                                     teacherSubject=form.teacherSubject.data
                                   )
             db.session.add(new_teacher)
@@ -396,12 +401,12 @@ def reflection():
 def login_teacher():
         form = teachLoginForm()
         if form.validate_on_submit():
-            teacher = Teacher.query.filter_by(teacherEmail=form.teacherEmail.data).first()
-            hashed_password = teacher.teacherPassword
-            password = form.teacherPassword.data
+            teacher = User.query.filter_by(email=form.email.data).first()
+            hashed_password = teacher.password
+            password = form.password.data
             if teacher:
                 if bcrypt.check_password_hash(hashed_password, password):
-                    session['email'] = teacher.teacherEmail
+                    session['email'] = teacher.email
                     login_user(teacher)
                     return redirect(url_for('teacher_dashboard'))
         return render_template("login_teacher.html", form=form)
@@ -442,7 +447,7 @@ def addSlides():
                             slidesAuthor=form.slidesAuthor.data,
                             slidesSubject=form.slidesSubject.data,
                             slidesLink=form.slidesLink.data,
-                            teacherEmail=session['email']
+                            email=session['email']
                             )
         db.session.add(new_slides)
         db.session.commit()
