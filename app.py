@@ -445,7 +445,7 @@ def controlSlides():
 
         prediction = hand_model.predict(img_array)
 
-        if(prediction[0][0] > 0.998):
+        if(prediction[0][0] > 0.9998):
             direction = "left"
         elif(prediction[0][0] < 0.5):
             direction = "right"
