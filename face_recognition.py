@@ -6,20 +6,28 @@ from keras.models import Model
 import collections
 import os
 
-detection_model = face_detection_model = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # Dictionary to store true images and names
-true_images = {
-    'Ryo': cv2.imread('static/AttendanceUploads/true_image_1.png', 0),
-    'WillSmith': cv2.imread('static/AttendanceUploads/true_image_2.png', 0),
+
+# true_images = {}
+#     students = Student.query.all()
+#     for student in students:
+#         true_images[student.name] = student.studentImage
+
+detection_model = face_detection_model = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+# true_images = {
+#     'Ryo': cv2.imread('static/AttendanceUploads/true_image_1.png', 0),
+#     'WillSmith': cv2.imread('static/AttendanceUploads/true_image_2.png', 0),
     
-}
+# }
  #Preprocess true images
 
-for name, true_img in true_images.items():
-    true_img = true_img.astype('float32')/255
-    true_img = cv2.resize(true_img, (92, 112))
-    true_img = true_img.reshape(1, true_img.shape[0], true_img.shape[1], 1)
-    print(true_img.shape)
+# for name, true_img in true_images.items():
+#     true_img = true_img.astype('float32')/255
+#     true_img = cv2.resize(true_img, (92, 112))
+#     true_img = true_img.reshape(1, true_img.shape[0], true_img.shape[1], 1)
+#     print(true_img.shape)
+
+
 
 #Load the model
 input_shape = (112,92,1)
@@ -37,7 +45,7 @@ model = Model(inputs = [input_top, input_bottom], outputs = distance)
 
 model.load_weights('models/Siamese_nn.h5')
 
-def predict_face(img):
+def predict_face(img,true_images):
     img = cv2.imread(img)
     if type(img) != np.ndarray:
         raise TypeError("Input image must be a numpy array")
@@ -47,6 +55,7 @@ def predict_face(img):
         return None, float("inf"), img
     
     scores = []
+    names = []
     for (x, y, w, h) in faces:
         face = grayscale_img[y:y+h, x:x+w]
         face = cv2.resize(face, (112, 92))
@@ -55,6 +64,8 @@ def predict_face(img):
         
         score_per_face = {}
         for name, true_img in true_images.items():
+            print(true_img)
+            true_img = cv2.imread(true_img,0)
             true_img = true_img.astype('float32')/255
             true_img = cv2.resize(true_img, (92, 112))
             true_img = true_img.reshape(1, true_img.shape[0], true_img.shape[1], 1)
@@ -71,10 +82,12 @@ def predict_face(img):
         else:
             best_name = [k for k, v in scores[i].items() if v == best_score][0]
             name = best_name
+        names.append(name) # append the name to the list of names
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
         cv2.putText(img, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     
     return img
+    #return img, names
 
 
 # img = cv2.imread('static/class_img.jpg', 1)

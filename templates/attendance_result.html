@@ -113,6 +113,15 @@
               <img src="{{ url_for('display_image', filename=filename) }}" width="360" height="640">
             </div>
           </div>
+          <br>
+          <div class="container">
+            <p><h2 align="center">Students in attendance</h2></p>
+            <p align="center">
+              {% for name in names %}
+                {{ name }}<br>
+              {% endfor %}
+            </p>
+          </div>
       </div>
     </section>
 

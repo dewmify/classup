@@ -127,7 +127,7 @@ class Teacher(User):
 class Student(User):
     __tablename__ = 'students'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True)
-    studentImage = db.Column(db.String(45), nullable=True)
+    studentImage = db.Column(db.String(60), nullable=True)
     studentPresMath = db.Column(db.Integer, nullable=False)
     studentPresScience = db.Column(db.Integer, nullable=False)
     studentPresChinese = db.Column(db.Integer, nullable=False)
@@ -138,9 +138,8 @@ class Student(User):
         'polymorphic_identity': 'student',
     }
 
-    def __init__(self, id, name, email, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
-        super().__init__(id, name, email, password, 'student')
-        self.id = id
+    def __init__(self, id, email,name, password, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
+        super().__init__(id, email, name, password, 'student')
         self.studentImage = studentImage
         self.studentPresMath = studentPresMath
         self.studentPresScience = studentPresScience
@@ -344,7 +343,8 @@ def admin_create_student():
             db.session.add(new_student)
             db.session.commit()
             # Retrieve the newly created student
-            student = Student.query.filter_by(email=form.email.data).first()
+            student = User.query.filter_by(name = form.name.data).first()
+
             
             # Obtain the student id
             student_id = student.id 
@@ -638,11 +638,16 @@ def display_image(filename):
 
 @app.route('/process_attendance', methods=['POST'])
 def process_attendance():
+    true_images = {}
+    students = Student.query.all()
+    for student in students:
+        true_images[student.name] = student.studentImage
+
     filename = "class_img.jpg"
     image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
     # Call the predict_faces function from face_detection.py
-    processed_image = face_recognition.predict_face(image_path)
+    processed_image = face_recognition.predict_face(image_path,true_images)
 
     # Save the processed image to disk
     processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
@@ -665,7 +670,8 @@ def onboarding(student_id):
         cv2.waitKey(1)
         counter -= 0.1
         if counter <= 0:
-            imgpath = 'static/AttendanceUploads/true_image_' + str(student_id) + '.png'
+            #imgpath = 'static/AttendanceUploads/true_image_' + str(student_id) + '.png'
+            imgpath = 'static/AttendanceUploads/true_image_{}.png'.format(student_id)
             cv2.imwrite(imgpath, face_box)
             #Update the Student object in the database
             student = Student.query.get(student_id)
