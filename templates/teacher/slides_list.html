@@ -34,6 +34,30 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  <script>
+    const slidesTable = document.getElementById("slidesTable");
+    const searchInput = document.getElementById("searchInput");
+    const subjectSelect = document.getElementById("subjectSelect");
+  
+    searchInput.addEventListener("input", search);
+    subjectSelect.addEventListener("change", search);
+  
+    function search() {
+      const searchValue = searchInput.value.toLowerCase();
+      const subjectValue = subjectSelect.value.toLowerCase();
+  
+      for (let i = 0; i < slidesTable.rows.length; i++) {
+        const slidesName = slidesTable.rows[i].cells[1].textContent.toLowerCase();
+        const slidesSubject = slidesTable.rows[i].cells[4].textContent.toLowerCase();
+  
+        if (slidesName.includes(searchValue) && (subjectValue === "" || slidesSubject === subjectValue)) {
+          slidesTable.rows[i].style.display = "table-row";
+        } else {
+          slidesTable.rows[i].style.display = "none";
+        }
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -104,39 +128,58 @@
             <h3>List of Slides</h3>
             <button class="btn btn-primary btn-lg" style="background-color: #008374;"><a href="/addSlides"  style="color: white">Add Slides</a></button>
           </div>
+          <form>
+            <label for="subject">Filter by Subject:</label>
+            <select id="subject" name="subject">
+              <option value="">All</option>
+              <option value="Math">Math</option>
+              <option value="Science">Science</option>
+              <option value="Chinese">Chinese</option>
+              <option value="Chinese">English</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-lg" style="background-color: #008374;"><a style="color: white">Filter</a></button>
+          </form>
           {% if slidesList == [] %}
               <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
               <br>
               <br>
               <p><a  style="margin-left:42.5%;">No slides added yet.</a></p>
           {% else %}
-              <table class="table">
-                  <thead>
-                      <tr>
-                          <th scope="col">ID</th>
-                          <th scope="col">Title</th>
-                          <th scope="col">Date</th>
-                          <th scope="col">Author</th>
-                          <th scope="col">Subject</th>
-                          <th scope="col">Actions</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      {% for i in range(slidesList|length) %}
-                          <tr>
-                              <td>{{ slidesList[i].slidesId }}</td>
-                              <td><a href="{{url_for('slides', slidesId = slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
-                              <td>{{ slidesList[i].slidesDate }}</td>
-                              <td>{{ slidesList[i].slidesAuthor }}</td>
-                              <td>{{ slidesList[i].slidesSubject }}</td>
-                              <td>
-                                  <a href="{{ url_for('editSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-primary">Edit</a>
-                                  <a href="{{ url_for('deleteSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-danger">Delete</a>
-                              </td>
-                          </tr>
-                      {% endfor %}
-                  </tbody>
-              </table>
+            
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Author</th>
+                  <th scope="col">Subject</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in range(slidesList|length) %}
+                  {% if slidesList[i].email == email %}
+                    <tr>
+                      <td>{{ slidesList[i].slidesId }}</td>
+                      <td><a href="{{url_for('slides', slidesId=slidesList[i].slidesId)}}">{{ slidesList[i].slidesName }}</a></td>
+                      <td>{{ slidesList[i].slidesDate }}</td>
+                      <td>{{ slidesList[i].slidesAuthor }}</td>
+                      <td>{{ slidesList[i].slidesSubject }}</td>
+                      <td>
+                        <a href="{{ url_for('editSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ url_for('deleteSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-danger">Delete</a>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
+                    <br>
+                    <br>
+                    <p><a  style="margin-left:42.5%;">No slides added yet.</a></p>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
           {% endif %}
         </div>
       </div>
