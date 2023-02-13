@@ -51,27 +51,21 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href="#">Drop Down 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li><a href="/">Home</a></li>
+          {% if user %}
+            {% if user.type == 'teacher' %}
+              <li><a href="/teacher_dashboard"><span>Your Dashboard</span></a></li>
+              <li class="dropdown"><span>{{ user.email }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
                 <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
-                  <li><a href="#">Deep Drop Down 2</a></li>
-                  <li><a href="#">Deep Drop Down 3</a></li>
-                  <li><a href="#">Deep Drop Down 4</a></li>
-                  <li><a href="#">Deep Drop Down 5</a></li>
+                  <li><a class="nav-link" href="/logout">Log Out</a></li>
                 </ul>
               </li>
-              <li><a href="#">Drop Down 2</a></li>
-              <li><a href="#">Drop Down 3</a></li>
-              <li><a href="#">Drop Down 4</a></li>
-            </ul>
-          </li>
-          <li><a href="#contact">Contact</a></li>
+            {% elif user.type == 'student' %}
+            {% endif %}
+          {% else %}
+            <li><a href="/login">Login</a></li>
+          {% endif %}
+
         </ul>
       </nav><!-- .navbar -->
 
@@ -90,8 +84,8 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Sample Inner Page</h2>
-              <p>Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat ipsum dolorem.</p>
+              <h2>Student Onboarding</h2>
+              <p>Onboarding an image of the student's face</p>
             </div>
           </div>
         </div>
@@ -99,8 +93,8 @@
       <nav>
         <div class="container">
           <ol>
-            <li><a href="index.html">Home</a></li>
-            <li>Sample Inner Page</li>
+            <li><a href="/">Home</a></li>
+            <li>Student Onboarding</li>
           </ol>
         </div>
       </nav>
@@ -111,10 +105,11 @@
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
         <form action="{{ url_for('onboard', student_id=student.id) }}" method="post">
-          <input type="submit" value="Start Onboarding" >
+          <button type="submit" class="btn btn-primary btn-lg" style="background-color: #008374;"><a>Start Onboarding</a></button>
         </form>
         {% if message %}
         <p>{{ message }}</p>
+        <h2><a href="/">Back to home page</a></h2>
         {% endif %}
       </div>
     </section>    
