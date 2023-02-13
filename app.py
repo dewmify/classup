@@ -278,6 +278,16 @@ def logout():
     logout_user()
     return render_template("/index.html")
 
+# routes error handling
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+
 #admin routes --------------------
 @app.route("/login-admin", methods =['GET', 'POST'])
 def login_admin():
