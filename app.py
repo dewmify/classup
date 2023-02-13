@@ -543,7 +543,6 @@ def account():
 @app.route("/teacher-sentiments")
 def teacher_sentiments():
     subject = session['teacherSubject']
-    name = session['name']
     reflections_list=[]
     reflections = Reflection.query.all()
     for reflection in reflections:
@@ -551,7 +550,7 @@ def teacher_sentiments():
             reflections_list.append(reflection)
 
     sorted_reflection_list = sorted(reflections_list, key=lambda x: x.week)
-    return render_template('teacher/teacher-sentiments.html', sorted_reflection_list=sorted_reflection_list, name=name)
+    return render_template('teacher/teacher-sentiments.html', sorted_reflection_list=sorted_reflection_list)
 
 
 @app.route("/addSlides", methods=["GET", "POST"])
