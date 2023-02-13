@@ -100,7 +100,7 @@
         <section id="dashboard_nav">
           <nav>
               <button><a href="#classes">View Classes</a></button>
-              <button><a href="#slides">View Slides</a></button>
+              <button><a href="/slides_list">View Slides</a></button>
               <button><a href="#subjects">View Subjects</a></button>
           </nav>
         </section>
@@ -108,19 +108,6 @@
           <section id="classes">
             <h2>Classes</h2>
             
-          </section>
-    
-          <section id="slides">
-            <h2>Slides</h2>
-            {% if slidesList == [] %}
-              <img src="/static/img/empty_slides.png" style="width: 15%;">
-              <br>
-              <br>
-              <p>No slides added yet.</p>
-            {% else %}
-                <p><a href="/slides_list">View Slides Here</a></p>
-            {% endif %}
-            <p><a href="/addSlides">Add Slides</a></p>
           </section>
     
           <section id="subjects">

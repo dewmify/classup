@@ -100,12 +100,15 @@
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
         <div class="viewAllSlides">
-          <h3>List of Slides</h3>
+          <div>
+            <h3>List of Slides</h3>
+            <button><a href="/addSlides">Add Slides</a></button>
+          </div>
           {% if slidesList == [] %}
               <img src="/static/img/empty_slides.png" style="width: 15%; margin-left:42.5%;">
               <br>
               <br>
-              <p>No slides added yet.</p>
+              <p><a  style="margin-left:42.5%;">No slides added yet.</a></p>
           {% else %}
               <table class="table">
                   <thead>

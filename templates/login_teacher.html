@@ -36,6 +36,12 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+
+  <style>
+    .flashes {
+      color : red;
+    }
+  </style>
 </head>
 
 <body>
@@ -117,19 +123,47 @@
 
           <div class="col-lg-8">
             <form action="/login-teacher" method="POST" class="form-teacher-login">
+              {{ form.hidden_tag() }} 
               <div class="row">
-                {{ form.hidden_tag() }} 
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.email) }}
+                  {{ form.email.label }}
+                  {{ form.email(class="form-control") }}
+                  {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                      <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+            
+                <div class="form-group mt-3">
+                  {{ form.password.label }}
+                  {{ form.password(class="form-control", style="height: 50px;") }}
+                  {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                      <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                <br>
+                <br>
               </div>
-  
-              <div class="form-group mt-3">
-                {{ wtf.form_field(form.password, style="height: 50px;") }}
-              </div>
-              <br>
-              <br>
               <div class="text-center"><button type="submit">Login</button></div>
+              {% if form.errors %}
+                {% for field, error in form.errors.items() %}
+                  <span class="text-danger">{{ field }}: {{ error }}</span>
+                {% endfor %}
+              {% endif %}
             </form>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class="flashes">
+                  {% for message in messages %}
+                    <li class="flash">{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
           </div><!-- End Contact Form -->
 
         </div>

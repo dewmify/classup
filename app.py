@@ -24,7 +24,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, HiddenField, DateField, SelectField
 from wtforms.validators import InputRequired, Email, Length, Optional, ValidationError
 from random import randrange
 
@@ -126,29 +126,6 @@ class Student(User):
         self.studentPresEnglish = studentPresEnglish
         self.studentisTaking = studentisTaking
 
-# class Student(db.Model, UserMixin):
-#     id = db.Column(db.Integer, nullable=False, primary_key=True)
-#     studentEmail = db.Column(db.String(100), nullable=False)
-#     studentName = db.Column(db.String(45), nullable=False)
-#     studentPassword = db.Column(db.String(200), nullable=False)
-#     studentImage = db.Column(db.String(45), nullable=False)
-#     studentPresMath = db.Column(db.Integer, nullable=False)
-#     studentPresScience = db.Column(db.Integer, nullable=False)
-#     studentPresChinese = db.Column(db.Integer, nullable=False)
-#     studentPresEnglish = db.Column(db.Integer, nullable=False)
-#     studentisTaking = db.Column(db.Integer, nullable=False)
-
-#     def __init__(self, id, studentName, studentEmail, studentPassword, studentImage, studentPresMath, studentPresScience, studentPresChinese, studentPresEnglish, studentisTaking):
-#         self.id = id
-#         self.studentName = studentName
-#         self.studentEmail = studentEmail
-#         self.studentPassword = studentPassword
-#         self.studentImage = studentImage
-#         self.studentPresMath = studentPresMath
-#         self.studentPresScience = studentPresScience
-#         self.studentPresChinese = studentPresChinese
-#         self.studentPresEnglish = studentPresEnglish
-#         self.studentisTaking = studentisTaking
 
 class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
@@ -160,20 +137,6 @@ class Admin(db.Model, UserMixin):
       self.adminEmail = adminEmail
       self.adminPassword = adminPassword
 
-
-# class Teacher(db.Model, UserMixin):
-#     id = db.Column(db.Integer, nullable=False, primary_key=True)
-#     teacherName = db.Column(db.String(100), nullable=False)
-#     teacherEmail = db.Column(db.String(100), nullable=False, unique=True)
-#     teacherPassword = db.Column(db.String(100), nullable=False)
-#     teacherSubject = db.Column(db.String(45), nullable=False)
-
-#     def __init__(self, id, teacherName, teacherEmail, teacherPassword, teacherSubject):
-#         self.id = id
-#         self.teacherName = teacherName
-#         self.teacherEmail = teacherEmail
-#         self.teacherPassword = teacherPassword
-#         self.teacherSubject = teacherSubject
 
 class Subject(db.Model, UserMixin):
     name = db.Column(db.String(100), primary_key=True)
@@ -260,7 +223,7 @@ class addSlidesForm(FlaskForm):
      slidesName = StringField('Slides Name', validators=[InputRequired()])
      slidesDate = DateField('Slides Date', validators=[InputRequired()])
      slidesAuthor = StringField('Slides Author', validators=[InputRequired()])
-     slidesSubject = StringField('Slides Subject', validators=[InputRequired()])
+     slidesSubject = SelectField('Slides Subject', choices=[('Science', 'Science'), ('Math', 'Math'), ('Chinese', 'Chinese'), ('English', 'English')])
      slidesLink = StringField("Slides Link (Embed Link from OneDrive)", validators=[InputRequired()])
 
 # routes
@@ -369,17 +332,23 @@ def reflection():
 # teacher routes------------------------
 @app.route("/login-teacher", methods =['GET', 'POST'])
 def login_teacher():
-        form = teachLoginForm()
-        if form.validate_on_submit():
-            teacher = User.query.filter_by(email=form.email.data).first()
+    form = teachLoginForm()
+    if form.validate_on_submit():
+        teacher = User.query.filter_by(email=form.email.data).first()
+        if teacher:
             hashed_password = teacher.password
             password = form.password.data
-            if teacher:
-                if bcrypt.check_password_hash(hashed_password, password):
-                    session['email'] = teacher.email
-                    login_user(teacher)
-                    return redirect(url_for('teacher_dashboard'))
-        return render_template("login_teacher.html", form=form)
+            if bcrypt.check_password_hash(hashed_password, password):
+                session['email'] = teacher.email
+                login_user(teacher)
+                return redirect(url_for('teacher_dashboard'))
+            else:
+                flash("Incorrect password. Please try again.")
+        else:
+            flash("Email not found. Please try again.")
+    return render_template("login_teacher.html", form=form)
+
+
 
 
 # teacher pages ---------------------------
@@ -422,6 +391,8 @@ def addSlides():
         db.session.add(new_slides)
         db.session.commit()
         return redirect(url_for('slides_list'))
+    else:
+        flash("Error: Please fill out all the fields correctly.")
     return render_template("teacher/add_slides.html", form=form)
 
 @app.route("/editSlides/<int:slidesId>", methods=["GET", "POST"])
