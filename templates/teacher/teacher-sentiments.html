@@ -1,33 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+{% import "bootstrap/wtf.html" as wtf %}
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Teacher Dashboard</title>
+  <title>Student's home</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
-
-  <style>
-    
-    .button {
-      background-color: #008374; 
-      border: none;
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-     }
-
-    #main {
-      text-align: center;
-    }
-  </style>
 
   <!-- Favicons -->
   <link href="/static/img/favicon.png" rel="icon">
@@ -87,40 +68,67 @@
 
         </ul>
       </nav><!-- .navbar -->
+
       <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
       <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
 
     </div>
   </header><!-- End Header -->
   <!-- End Header -->
-  <section class="sample-page"> 
-    <div class="container" data-aos="fade-up">
-      <main id="main">
-        <h3>Teacher's Dashboard</h3>
-        <section id="dashboard_nav">
-          <nav>
-              <button><a href="#classes">View Classes</a></button>
-              <button><a href="/slides_list">View Slides</a></button>
-              <button><a href="#subjects">View Subjects</a></button>
-          </nav>
-        </section>
-        <main>
-          <section id="classes" style="text-align: center;">
-            <input type="hidden" id="positive_sentiment_count" value="{{ positivePercentage }}">
-            <input type="hidden" id="negative_sentiment_count" value="{{ negativePercentage }}">
-            <h2>Sentiment</h2>
-            <div style="display: flex; align-items: center; justify-content: center;">
-              <canvas id="myChart" width="400" height="400" ></canvas>
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs">
+      <div class="page-header d-flex align-items-center" style="background-image: url('');">
+        <div class="container position-relative">
+          <div class="row d-flex justify-content-center">
+            <div class="col-lg-6 text-center">
+              <h2>Sentiments overview</h2>
+              <p>Sentiments of your subject.</p>
             </div>
-          </section>
-    
-          <section id="subjects">
-            <h2>Subjects</h2>
-            <a href="/attendance" class="logo d-flex align-items-center">Attendance</a>
-          </section>
-    </div>
-  </section>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Breadcrumbs -->
+
+   
+         <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="portfolio sections-bg">
+        <div class="container" data-aos="fade-up">
   
+          <div class="section-header">
+            <table class="table" style="text-align: center">
+                <thead class="thead-green">
+                  <tr>
+                    <th scope="col">Week</th>
+                    <th scope="col">Topic Name</th>
+                    <th scope="col">Student Email</th>
+                    <th scope="col">Reflection</th>
+                    <th scope="col">Sentiment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for reflection in sorted_reflection_list %}
+                        <tr>
+                            <th scope="row">{{reflection.week}}</th>
+                            <td>{{reflection.topicName}}</td>
+                            <td>{{reflection.studentEmail}}</td>
+                            <td>{{reflection.reflection}}</td>
+                            {% if reflection.sentiment == 'Positive' %}
+                                <td style="color: #008374">{{reflection.sentiment}}</td>
+                            {% elif reflection.sentiment == "Negative" %}
+                                <td style="color: #FF829C">{{reflection.sentiment}}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                  
+                </tbody>
+              </table>
+          </div>
+        </div>
+        
+      </section><!-- End Portfolio Section -->
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -206,46 +214,9 @@
   <script src="/static/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="/static/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="/static/vendor/php-email-form/validate.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="/static/js/main.js"></script>
-  <script>
-    var ctx = document.getElementById("myChart").getContext("2d");
-    var positivePercentage = parseInt(document.getElementById("positive_sentiment_count").value);
-    var negativePercentage = parseInt(document.getElementById("negative_sentiment_count").value);
-    var myChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Positive", "Negative"],
-        datasets: [
-          {
-            data: [positivePercentage, negativePercentage],
-            backgroundColor: ["#008374", "#FF829C"],
-          },
-        ],
-      },
-      options: {
-        title: {
-          display: true,
-          text: positivePercentage.toFixed(2) + "% Positive",
-          fontSize: 20,
-          fontColor: "#000",
-          position: "top"
-        },
-        cutoutPercentage: 40,
-        responsive: false,
-        maintainAspectRatio: false,
-        width: 400,
-        height: 400
-      },
-     
-    });
-    myChart.canvas.onclick = function(event) {
-        window.location.href = "/teacher-sentiments";
-    }
-  </script>
-
 </body>
 
 </html>

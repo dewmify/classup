@@ -35,6 +35,11 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  <style>
+    .flash{
+      color:red;
+    }
+  </style>
 </head>
 
 <body>
@@ -91,7 +96,8 @@
       <nav>
         <div class="container">
           <ol>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="/teacher_dashboard">Teacher Dashboard</a></li>
+            <li><a href="/slides_list">Slides List</a></li>
             <li>Add Slides</li>
           </ol>
         </div>
@@ -127,7 +133,8 @@
                   {{ wtf.form_field(form.slidesAuthor) }}
                 </div>
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.slidesSubject) }}
+                  {{ wtf.form_field(form.slidesSubject, type="select",
+                      choices=[('Science', 'Science'), ('Math', 'Math'), ('Chinese', 'Chinese'), ('English', 'English')]) }}
                 </div>
                 <div class="form-group mt-3">
                   {{ wtf.form_field(form.slidesLink) }}
@@ -135,6 +142,9 @@
               </div>
               <br>
               <div class="text-center"><button type="submit">Add</button></div>
+              {% for message in get_flashed_messages() %}
+                <div class="flash">{{ message }}</div>
+              {% endfor %}
             </form>
           </div><!-- End Contact Form -->
         </div>

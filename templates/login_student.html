@@ -116,13 +116,20 @@
 
           <div class="col-lg-8">
             <form action="/login-student" method="POST" class="form-student-login">
+              {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  {% for message in messages %}
+                    <span style="color: red;">{{ message }}</span>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
               <div class="row">
                 {{ form.hidden_tag() }} 
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.studentEmail) }}
+                  {{ wtf.form_field(form.email) }}
                 </div>
                 <div class="form-group mt-3">
-                  {{ wtf.form_field(form.studentPass, style="height: 50px;") }}
+                  {{ wtf.form_field(form.password, style="height: 50px;") }}
                 </div>
               </div>
               <br>
@@ -134,9 +141,6 @@
 
       </div>
     </section><!-- End Contact Section -->
-      
-
-
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -227,5 +231,4 @@
   <script src="/static/js/main.js"></script>
 
 </body>
-
 </html>
