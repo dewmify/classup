@@ -8,7 +8,8 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
   <style>
-  #slides {
+  #slidesContainer {
+    display:block;
     text-align: center;
   }  
   </style>
@@ -46,10 +47,14 @@
       var slides = document.getElementById('slides');
       var slides_src = document.querySelector('#slidesSrc').value;
       slides.src = slides_src;
-      alert(slides.src);
+      // document.getElementById('slides').contentWindow.location.reload();
     }
-    
+
+    // var iframe = document.getElementById("slides");
+    // var presentation = iframe.contentWindow();
+
     function controlSlides() {
+
       var slides_src = document.querySelector('#slidesSrc').value;
 
       fetch('http://127.0.0.1:5000/api/v1/handgesture') 
@@ -65,15 +70,20 @@
             switch (data.direction) {
               case 'left':
                 console.log("left")
+                // presentation.previous();
+                document.getElementById("result").innerHTML = "Previous Slide";
                 document.getElementById("slides").contentWindow.postMessage("action=previous", slides_src);
                 break;
 
               case 'right':
                 console.log("right")
+                // presentation.next();
+                document.getElementById("result").innerHTML = "Next Slide";
                 document.getElementById("slides").contentWindow.postMessage("action=next", slides_src);
                 break;
 
               default:
+                document.getElementById("result").innerHTML = "Stay on this Slide";
                 break;
 
             }
@@ -82,7 +92,7 @@
         .catch(error => {
           alert(error);
         });
-      }
+    }
     
     setInterval(controlSlides, 5000);
 
@@ -150,10 +160,13 @@
       </nav>
     </div><!-- End Breadcrumbs -->
     <section class="sample-page">
-      <div class="container" data-aos="fade-up">
+      <div id="slidesContainer" class="container" data-aos="fade-up">
         <div>
-          <iframe id="slides" src="" width="800px" height="400px" frameborder="0">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+          <iframe id="slides" src="https://onedrive.live.com/embed?resid=E34C4380A0F5483C%213200&amp;authkey=!AHosZoG-l04QNPU&amp;em=2&amp;wdAr=1.7777777777777777" width="800px" height="400px" frameborder="0">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
           <!-- <button onclick="controlSlides()">Control Slides</button> -->
+        </div>
+        <div>
+          <a id="result">Result</a>
         </div>
       </div>
     </section>
