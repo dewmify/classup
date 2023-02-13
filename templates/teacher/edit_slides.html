@@ -1,33 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+  {% import "bootstrap/wtf.html" as wtf %}
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Teacher Dashboard</title>
+  <title>[Template] Sample Inner Page</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
-
-  <style>
-    
-    .button {
-      background-color: #008374; 
-      border: none;
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-     }
-
-    #main {
-      text-align: center;
-    }
-  </style>
 
   <!-- Favicons -->
   <link href="/static/img/favicon.png" rel="icon">
@@ -58,8 +39,7 @@
 
 <body>
 
-  <!-- ======= Header ======= -->
-  <!-- End Top Bar -->
+  <!-- ======= Header ======= --><!-- End Top Bar -->
 
   <header id="header" class="header d-flex align-items-center">
 
@@ -87,55 +67,81 @@
 
         </ul>
       </nav><!-- .navbar -->
+
       <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
       <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
 
     </div>
   </header><!-- End Header -->
   <!-- End Header -->
-  <section class="sample-page"> 
-    <div class="container" data-aos="fade-up">
-      <main id="main">
-        <h3>Teacher's Dashboard</h3>
-        <section id="dashboard_nav">
-          <nav>
-              <button><a href="#classes">View Classes</a></button>
-              <button><a href="#slides">View Slides</a></button>
-              <button><a href="#subjects">View Subjects</a></button>
-          </nav>
-        </section>
-        <main>
-          <section id="classes" style="text-align: center;">
-            <input type="hidden" id="positive_sentiment_count" value="{{ positivePercentage }}">
-            <input type="hidden" id="negative_sentiment_count" value="{{ negativePercentage }}">
-            <h2>Sentiment</h2>
-            <div style="display: flex; align-items: center; justify-content: center;">
-              <canvas id="myChart" width="400" height="400" ></canvas>
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs">
+      <div class="page-header d-flex align-items-center" style="background-image: url('');">
+        <div class="container position-relative">
+          <div class="row d-flex justify-content-center">
+            <div class="col-lg-6 text-center">
+              <h2>Add Slides</h2>
             </div>
-          </section>
-    
-          <section id="slides">
-            <h2>Slides</h2>
-            {% if slidesList == [] %}
-              <img src="/static/img/empty_slides.png" style="width: 15%;">
-              <br>
-              <br>
-              <p>No slides added yet.</p>
-            {% else %}
-                <p><a href="/slides_list">View Slides Here</a></p>
-            {% endif %}
-            <p><a href="/addSlides">Add Slides</a></p>
-          </section>
-    
-          <section id="subjects">
-            <h2>Subjects</h2>
-            <table>
-              
-            </table>
-          </section>
-    </div>
-  </section>
+          </div>
+        </div>
+      </div>
+      <nav>
+        <div class="container">
+          <ol>
+            <li><a href="index.html">Home</a></li>
+            <li>Add Slides</li>
+          </ol>
+        </div>
+      </nav>
+    </div><!-- End Breadcrumbs -->
+
+    <section id="contact" class="contact">
+      <div class="container" data-aos="fade-up">
+        <div class="row gx-lg-0 gy-4">
+          <div class="col-lg-4">
+            <div class="info-container d-flex flex-column align-items-center justify-content-center">
+              <div class="info-item d-flex">
+                <i class="bi bi-person-add" flex-shrink-0"></i>
+                <div>
+                  <h4>To add slides:</h4>
+                  <p>Enter the information on the right.</p>
+                </div>
+              </div><!-- End Info Item -->
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <form action="/editSlides/{{ slides.slidesId }}" method="POST" class="form-admin-create-student">
+                <div class="row">
+                  {{ form.hidden_tag() }}
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesName) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesDate) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesAuthor) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesSubject) }}
+                  </div>
+                  <div class="form-group mt-3">
+                    {{ wtf.form_field(form.slidesLink) }}
+                  </div>
+                </div>
+                <br>
+                <div class="text-center"><button type="submit">Submit Changes</button></div>
+              </form>
   
+          </div><!-- End Contact Form -->
+        </div>
+      </div>
+    </section><!-- End Contact Section -->
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -145,9 +151,9 @@
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-info">
           <a href="index.html" class="logo d-flex align-items-center">
-            <span>ClassUp</span>
+            <span>Impact</span>
           </a>
-          <p>The only classroom platform that institutions need to cut down on unproductive time.</p>
+          <p>Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus.</p>
           <div class="social-links d-flex mt-4">
             <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
             <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
@@ -181,11 +187,11 @@
         <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
           <h4>Contact Us</h4>
           <p>
-            180 Ang Mo Kio Ave 8 <br>
-            569830<br>
-            Singapore <br><br>
-            <strong>Phone:</strong> +65 6451 5115<br>
-            <strong>Email:</strong> classupcontact@mymail.edu.com.sg<br>
+            A108 Adam Street <br>
+            New York, NY 535022<br>
+            United States <br><br>
+            <strong>Phone:</strong> +1 5589 55488 55<br>
+            <strong>Email:</strong> info@example.com<br>
           </p>
 
         </div>
@@ -195,14 +201,14 @@
 
     <div class="container mt-4">
       <div class="copyright">
-        &copy; Copyright <strong><span>ClassUp</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span>Impact</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
         <!-- All the links in the footer should remain intact. -->
         <!-- You can delete the links only if you purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/impact-bootstrap-business-website-template/ -->
-        Designed by Bill Bezos</a>
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
       </div>
     </div>
 
@@ -221,45 +227,9 @@
   <script src="/static/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="/static/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="/static/vendor/php-email-form/validate.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="/static/js/main.js"></script>
-  <script>
-    var ctx = document.getElementById("myChart").getContext("2d");
-    var positivePercentage = parseInt(document.getElementById("positive_sentiment_count").value);
-    var negativePercentage = parseInt(document.getElementById("negative_sentiment_count").value);
-    var myChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Positive", "Negative"],
-        datasets: [
-          {
-            data: [positivePercentage, negativePercentage],
-            backgroundColor: ["#008374", "#FF829C"],
-          },
-        ],
-      },
-      options: {
-        title: {
-          display: true,
-          text: positivePercentage.toFixed(2) + "% Positive",
-          fontSize: 20,
-          fontColor: "#000",
-          position: "top"
-        },
-        cutoutPercentage: 40,
-        responsive: false,
-        maintainAspectRatio: false,
-        width: 400,
-        height: 400
-      },
-     
-    });
-    myChart.canvas.onclick = function(event) {
-        window.location.href = "/teacher-sentiments";
-    }
-  </script>
 
 </body>
 

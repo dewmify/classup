@@ -43,7 +43,7 @@
   <header id="header" class="header d-flex align-items-center">
 
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="/" class="logo d-flex align-items-center">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="/static/img/logo.png" alt=""> -->
         <h1>ClassUp<span>!</span></h1>
@@ -90,8 +90,8 @@
       <nav>
         <div class="container">
           <ol>
-            <li><a href="index.html">Home</a></li>
-            <li>Sample Inner Page</li>
+            <li><a href="/teacher_dashboard">Teacher Dashboard</a></li>
+            <li>List of Slides</li>
           </ol>
         </div>
       </nav>
@@ -115,6 +115,7 @@
                           <th scope="col">Date</th>
                           <th scope="col">Author</th>
                           <th scope="col">Subject</th>
+                          <th scope="col">Actions</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -125,6 +126,10 @@
                               <td>{{ slidesList[i].slidesDate }}</td>
                               <td>{{ slidesList[i].slidesAuthor }}</td>
                               <td>{{ slidesList[i].slidesSubject }}</td>
+                              <td>
+                                  <a href="{{ url_for('editSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-primary">Edit</a>
+                                  <a href="{{ url_for('deleteSlides', slidesId=slidesList[i].slidesId) }}" class="btn btn-danger">Delete</a>
+                              </td>
                           </tr>
                       {% endfor %}
                   </tbody>
