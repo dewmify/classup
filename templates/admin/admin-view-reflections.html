@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Register Student</title>
+  <title>Student's home</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -52,16 +52,20 @@
       </a>
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="/admin-dashboard">Dashboard</a></li>
-          <li class="dropdown"><a href="#"><span>Services</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href="/admin-create-teacher">Create Teacher</a></li>
-              <li><a href="/admin-create-student">Create Student</a></li>
-              <li><a href="/admin-create-topic">Create Topic</a></li>
-              <li><a href="{{url_for('logout')}}">Logout</a></li>
-            </ul>
-          </li>
-          <li><a href="#login">Welcome back, Admin!</a></li>
+          <li><a href="/">Home</a></li>
+          {% if 'email' in session %}
+            <li><a href="/admin-dashboard"><span>Admin Dashboard</span></a></li>
+            <li class="dropdown"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+              <ul>
+                <li><a class="nav-link" href="/logout">Log Out</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li>
+              <a href="/login">Login</a>
+            </li>
+          {% endif %}
+
         </ul>
       </nav><!-- .navbar -->
 
@@ -80,53 +84,47 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Create Topic</h2>
+              <h2>Details of all Reflections</h2>
             </div>
           </div>
         </div>
       </div>
     </div><!-- End Breadcrumbs -->
 
-    <section id="contact" class="contact">
-      <div class="container" data-aos="fade-up">
-        <div class="row gx-lg-0 gy-4">
-          <div class="col-lg-4">
-            <div class="info-container d-flex flex-column align-items-center justify-content-center">
-              <div class="info-item d-flex">
-                <i class="bi bi-person-add" flex-shrink-0"></i>
-                <div>
-                  <h4>To register a topic:</h4>
-                  <p>Enter the information on the right.</p>
-                </div>
-              </div><!-- End Info Item -->
-            </div>
+   
+         <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="portfolio sections-bg">
+        <div class="container" data-aos="fade-up">
+  
+          <div class="section-header">
+            <table class="table" style="text-align: center">
+                <thead class="thead-green">
+                  <tr>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Topic Name</th>
+                    <th scope="col">Week</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Reflection</th>
+                    <th scope="col">Sentiment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for reflection in reflections_list %}
+                        <tr>
+                            <td>{{reflection.subjectName}}</td>
+                            <td>{{reflection.topicName}}</td>
+                            <td>{{reflection.week}}</td>
+                            <td>{{reflection.studentEmail}}</td>
+                            <td>{{reflection.reflection}}</td>
+                            <td>{{reflection.sentiment}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
           </div>
-
-          <div class="col-lg-8">
-            <form action="/admin-create-topic" method="POST" class="form-admin-create-student">
-              <div class="row">
-                {{ form.hidden_tag() }}
-                <div class="form-group mt-3">
-                  {{ wtf.form_field(form.topicSubject) }}
-                </div>
-                <div class="form-group mt-3">
-                  {{ wtf.form_field(form.topicName) }}
-                </div>
-                <div class="form-group mt-3">
-                  {{ wtf.form_field(form.topicWeek, style="height: 50px;") }}
-                </div>
-              </div>
-              <br>
-              <section id="subjects" style="text-align: center;">
-                <button type="submit" class="btn btn-primary btn-lg" style="background-color: #008374; display: inline-block; margin: 0 auto;">
-                  <a style="color: white">Create</a>
-                </button>
-              </section>
-            </form>
-          </div><!-- End Contact Form -->
         </div>
-      </div>
-    </section><!-- End Contact Section -->
+        
+      </section><!-- End Portfolio Section -->
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -135,7 +133,7 @@
     <div class="container">
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-info">
-          <a href="/" class="logo d-flex align-items-center">
+          <a href="index.html" class="logo d-flex align-items-center">
             <span>ClassUp</span>
           </a>
           <p>The only classroom platform that institutions need to cut down on unproductive time.</p>
@@ -215,7 +213,6 @@
 
   <!-- Template Main JS File -->
   <script src="/static/js/main.js"></script>
-
 </body>
 
 </html>
