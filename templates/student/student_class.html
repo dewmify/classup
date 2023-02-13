@@ -56,11 +56,11 @@
             <ul>
               <li><a href="/student-index">Classes</a></li>
               <li><a href="#">Account</a></li>
-              <li><a href="#">Grades</a></li>
+              <li><a href="/student-grades">Grades</a></li>
               <li><a href="{{url_for('logout')}}">Logout</a></li>
             </ul>
           </li>
-          <li><a href="#login">Welcome back, Max!</a></li>
+          <li><a href="#login">Welcome back, {{name}}!</a></li>
         </ul>
       </nav><!-- .navbar -->
 
@@ -79,7 +79,7 @@
         <div class="container position-relative">
           <div class="row d-flex justify-content-center">
             <div class="col-lg-6 text-center">
-              <h2>Student's Classes</h2>
+              <h2>{{name}}'s Classes</h2>
               <p>Details of your class.</p>
             </div>
           </div>
@@ -118,7 +118,7 @@
             <div class="accordion accordion-flush" id="faqlist" data-aos="fade-up" data-aos-delay="100">
                 {% for topic in topics_list %}
                   <div class="accordion-item" data-value="{{topic_subject}}, {{topic.topicWeek}}, {{topic.topicName}}">
-                    <h3 class="accordion-header">
+                    <h3 class="accordion-header" >
                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-{{loop.index}}">
                         <span class="num">Week {{topic.topicWeek}}</span>
                         {{topic.topicName}}
@@ -126,7 +126,7 @@
                     </h3>
                     <div id="faq-content-{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#faqlist">
                       <div class="accordion-body">
-                        <a href="/reflection/{{topic_subject}}/{{topic.topicWeek}}/{{topic.topicName}}">Write your reflection for this week</a>
+                          <a href="/reflection/{{topic_subject}}/{{topic.topicWeek}}/{{topic.topicName}}">Write your reflection for this week</a>
                       </div>
                     </div>
                   </div><!-- # Faq item-->
