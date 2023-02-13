@@ -82,12 +82,12 @@ def predict_face(img,true_images):
         else:
             best_name = [k for k, v in scores[i].items() if v == best_score][0]
             name = best_name
-        names.append(name) # append the name to the list of names
+            names.append(name) # append the name to the list of names
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
         cv2.putText(img, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     
-    return img
-    #return img, names
+    #return img
+    return img, names
 
 
 # img = cv2.imread('static/class_img.jpg', 1)

@@ -110,12 +110,14 @@
     
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
-        <form action="url_for(onboard)" method="post">
+        <form action="{{ url_for('onboard', student_id=student.id) }}" method="post">
           <input type="submit" value="Start Onboarding" >
         </form>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
       </div>
-    </section>
-    
+    </section>    
 
   </main><!-- End #main -->
 

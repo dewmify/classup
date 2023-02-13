@@ -407,6 +407,7 @@ def login_teacher():
             if teacher:
                 if bcrypt.check_password_hash(hashed_password, password):
                     session['email'] = teacher.email
+                    session['teacherSubject'] = teacher.teacherSubject
                     login_user(teacher)
                     return redirect(url_for('teacher_dashboard'))
         return render_template("login_teacher.html", form=form)
@@ -639,6 +640,9 @@ def display_image(filename):
 @app.route('/process_attendance', methods=['POST'])
 def process_attendance():
     true_images = {}
+    present_students = []
+    non_present_students = []
+
     students = Student.query.all()
     for student in students:
         true_images[student.name] = student.studentImage
@@ -647,14 +651,26 @@ def process_attendance():
     image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
     # Call the predict_faces function from face_detection.py
-    processed_image = face_recognition.predict_face(image_path,true_images)
+    img, names = face_recognition.predict_face(image_path,true_images)
 
     # Save the processed image to disk
     processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
-    cv2.imwrite(processed_image_path, processed_image)
+    cv2.imwrite(processed_image_path, img)
 
-    return render_template('attendance_result.html', filename="processed_" + filename)
-
+    studentPresSubject = "studentPres" + str(session["teacherSubject"])
+    for student in students:
+        for name in names:
+            Name = getattr(student, 'name')
+            if Name == name:
+                exec("student." + studentPresSubject + "= 0")
+                db.session.commit()
+    
+    for student in students:
+        if getattr(student, studentPresSubject) == 0:
+            present_students.append(student.name)
+        else:
+            non_present_students.append(student.name)
+    return render_template('attendance_result.html', filename="processed_" + filename, present_students=present_students, non_present_students=non_present_students)
 
 def onboarding(student_id):
     video_capture = cv2.VideoCapture(0)
@@ -686,12 +702,21 @@ def onboarding(student_id):
 
 
 
+# @app.route('/onboarding/<int:student_id>', methods=["GET","POST"])
+# def onboard(student_id):
+#     student = Student.query.get(student_id)
+#     #form = onboardForm()
+#     #if form.validate_on_submit():
+#     onboarding(student_id)
+#     return render_template('onboarding.html', student=student)
+
+
 @app.route('/onboarding/<int:student_id>', methods=["GET","POST"])
 def onboard(student_id):
     student = Student.query.get(student_id)
-    #form = onboardForm()
-    #if form.validate_on_submit():
-    onboarding(student_id)
+    if request.method == 'POST':
+        onboarding(student_id)
+        return render_template('onboarding.html', student=student, message='Onboarding process Finished')
     return render_template('onboarding.html', student=student)
     
 

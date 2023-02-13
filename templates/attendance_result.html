@@ -115,9 +115,18 @@
           </div>
           <br>
           <div class="container">
-            <p><h2 align="center">Students in attendance</h2></p>
+            <p><h2 align="center">Students in attendance for {{ session['teacherSubject'] }}</h2></p>
             <p align="center">
-              {% for name in names %}
+              {% for name in present_students %}
+                {{ name }}<br>
+              {% endfor %}
+            </p>
+          </div>
+          <br>
+          <div class="container">
+            <p><h2 align="center">Students not in attendance for {{ session['teacherSubject'] }}</h2></p>
+            <p align="center">
+              {% for name in non_present_students %}
                 {{ name }}<br>
               {% endfor %}
             </p>
