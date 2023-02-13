@@ -5,29 +5,9 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Teacher Dashboard</title>
+  <title>Student's home</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
-
-  <style>
-    
-    .button {
-      background-color: #008374; 
-      border: none;
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-     }
-
-    #main {
-      text-align: center;
-    }
-  </style>
 
   <!-- Favicons -->
   <link href="/static/img/favicon.png" rel="icon">
@@ -72,57 +52,92 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a href="/">Home</a></li>
-          {% if 'email' in session %}
-            <li><a href="/teacher_dashboard"><span>Your Dashboard</span></a></li>
-            <li class="dropdown"><span>{{ session['email'] }}</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
-              <ul>
-                <li><a class="nav-link" href="/logout">Log Out</a></li>
-              </ul>
-            </li>
-          {% else %}
-            <li>
-              <a href="/login">Login</a>
-            </li>
-          {% endif %}
-
+          <li class="dropdown"><a href="#"><span>Services</span><i class="bi bi-chevron-down dropdown-indicator"></i></a>
+            <ul>
+              <li><a href="/student-index">Classes</a></li>
+              <li><a href="#">Account</a></li>
+              <li><a href="/student-grades">Grades</a></li>
+              <li><a href="{{url_for('logout')}}">Logout</a></li>
+            </ul>
+          </li>
+          <li><a href="#login">Welcome back, {{name}}!</a></li>
         </ul>
       </nav><!-- .navbar -->
+
       <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
       <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
 
     </div>
   </header><!-- End Header -->
   <!-- End Header -->
-  <section class="sample-page"> 
-    <div class="container" data-aos="fade-up">
-      <main id="main">
-        <h3>Teacher's Dashboard</h3>
-        <section id="dashboard_nav">
-          <nav>
-              <button><a href="#classes">View Classes</a></button>
-              <button><a href="/slides_list">View Slides</a></button>
-              <button><a href="#subjects">View Subjects</a></button>
-          </nav>
-        </section>
-        <main>
-          <section id="classes" style="text-align: center;">
-            <input type="hidden" id="positive_sentiment_count" value="{{ positivePercentage }}">
-            <input type="hidden" id="negative_sentiment_count" value="{{ negativePercentage }}">
-            <h2>Sentiment</h2>
-            <div style="display: flex; align-items: center; justify-content: center;">
-              <canvas id="myChart" width="400" height="400" ></canvas>
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs">
+      <div class="page-header d-flex align-items-center" style="background-image: url('');">
+        <div class="container position-relative">
+          <div class="row d-flex justify-content-center">
+            <div class="col-lg-6 text-center">
+              <h2>Results</h2>
+              <p>Your results for this year.</p>
             </div>
-          </section>
-    
-          <section id="subjects">
-            <h2>Subjects</h2>
-            <table>
-              
-            </table>
-          </section>
-    </div>
-  </section>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Breadcrumbs -->
+
+   
+         <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="portfolio sections-bg">
+        <div class="container" data-aos="fade-up">
   
+          <div class="section-header">
+            <table class="table" style="text-align: center">
+                <thead class="thead-green">
+                  <tr>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Term 1 Grade</th>
+                    <th scope="col">Term 2 grade</th>
+                    <th scope="col">Overall grade</th>
+                    <th scope="col">Attendance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Math</th>
+                    <td>A</td>
+                    <td>C-</td>
+                    <td>B-</td>
+                    <td>80%</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Science</th>
+                    <td>C</td>
+                    <td>C-</td>
+                    <td>C-</td>
+                    <td>71%</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">English</th>
+                    <td>A</td>
+                    <td>A</td>
+                    <td>A</td>
+                    <td>100%</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Chinese</th>
+                    <td>C-</td>
+                    <td>D</td>
+                    <td>C-</td>
+                    <td>85%</td>
+                  </tr>
+                </tbody>
+              </table>
+          </div>
+        </div>
+        
+      </section><!-- End Portfolio Section -->
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -208,46 +223,9 @@
   <script src="/static/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="/static/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="/static/vendor/php-email-form/validate.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="/static/js/main.js"></script>
-  <script>
-    var ctx = document.getElementById("myChart").getContext("2d");
-    var positivePercentage = parseInt(document.getElementById("positive_sentiment_count").value);
-    var negativePercentage = parseInt(document.getElementById("negative_sentiment_count").value);
-    var myChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Positive", "Negative"],
-        datasets: [
-          {
-            data: [positivePercentage, negativePercentage],
-            backgroundColor: ["#008374", "#FF829C"],
-          },
-        ],
-      },
-      options: {
-        title: {
-          display: true,
-          text: positivePercentage.toFixed(2) + "% Positive",
-          fontSize: 20,
-          fontColor: "#000",
-          position: "top"
-        },
-        cutoutPercentage: 40,
-        responsive: false,
-        maintainAspectRatio: false,
-        width: 400,
-        height: 400
-      },
-     
-    });
-    myChart.canvas.onclick = function(event) {
-        window.location.href = "/teacher-sentiments";
-    }
-  </script>
-
 </body>
 
 </html>

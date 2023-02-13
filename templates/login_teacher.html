@@ -123,7 +123,13 @@
 
           <div class="col-lg-8">
             <form action="/login-teacher" method="POST" class="form-teacher-login">
-              {{ form.hidden_tag() }} 
+              {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  {% for message in messages %}
+                    <span style="color: red;">{{ message }}</span>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
               <div class="row">
                 <div class="form-group mt-3">
                   {{ form.email.label }}
