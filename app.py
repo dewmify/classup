@@ -466,20 +466,19 @@ def login_teacher():
             if not re.match(r"[^@]+@[^@]+\.[^@]+", form.email.data):
                 flash("Invalid email address format", "danger")
                 return redirect(url_for('login_teacher'))
-            
+
             teacher = User.query.filter_by(email=form.email.data).first()
-            
+
             if not teacher:
                 flash("User does not exist", "danger")
                 return redirect(url_for('login_teacher'))
-            
+
             hashed_password = teacher.password
             password = form.password.data
-
             if not password:
                 flash("Password is required", "danger")
                 return redirect(url_for('login_teacher'))
-                
+
             if bcrypt.check_password_hash(hashed_password, password):
                 session['email'] = teacher.email
                 session['teacherSubject'] = teacher.teacherSubject
@@ -488,10 +487,8 @@ def login_teacher():
             else:
                 flash("Wrong Password", "danger")
                 return redirect(url_for('login_teacher'))
-        
+
         return render_template("login_teacher.html", form=form)
-
-
 
 
 # teacher pages ---------------------------
@@ -616,13 +613,14 @@ def controlSlides():
 
         prediction = hand_model.predict(img_array)
 
-        if(prediction[0][0] > 0.9998):
+        if(prediction[0][0] == 1):
             direction = "left"
         elif(prediction[0][0] < 0.5):
             direction = "right"
         else:
             direction = "none"
 
+        print(prediction)
         print(direction)
 
     video.release()
