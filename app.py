@@ -593,8 +593,13 @@ def slides(slidesId):
 
 @app.route("/slides_list")
 def slides_list():
-    slidesList = Slides.query.all()      
-    return render_template('teacher/slides_list.html', slidesList = slidesList)
+    subject = request.args.get("subject")
+    email = session['email']
+    if subject:
+        slidesList = Slides.query.filter_by(slidesSubject=subject).all()
+    else:
+        slidesList = Slides.query.all()
+    return render_template('teacher/slides_list.html', slidesList = slidesList, email = email)
 
 @app.route("/account")
 def account():
