@@ -249,7 +249,7 @@ class adminCreateTeacherForm(adminCreateUserForm):
     
 class adminCreateTopicForm(FlaskForm):
     id= HiddenField('id')
-    topicSubject= RadioField('Topics Subject', validators=[InputRequired()], choices=['Math', 'Science', 'English', 'Chinese'])
+    topicSubject= SelectField('Topics Subject', validators=[InputRequired()], choices=['Math', 'Science', 'English', 'Chinese'])
     topicName= StringField('Topics Name', validators=[InputRequired()])
     topicWeek= StringField('Week', validators=[InputRequired()])
 
@@ -260,12 +260,12 @@ class adminLoginForm(FlaskForm):
     adminPass= PasswordField('Admin Password', validators=[InputRequired()])
 
 class studLoginForm(FlaskForm):
-    email= StringField('User Email', validators=[InputRequired()])
-    password= PasswordField('User Password', validators=[InputRequired()])
+    email= StringField('Student Email', validators=[InputRequired()])
+    password= PasswordField('Student Password', validators=[InputRequired()])
 
 class teachLoginForm(FlaskForm):
-    email= StringField('User Email', validators=[InputRequired()])
-    password= PasswordField('User Password', validators=[InputRequired()])
+    email= StringField('Teacher Email', validators=[InputRequired()])
+    password= PasswordField('Teacher Password', validators=[InputRequired()])
 
 #reflection form
 class studentReflectionForm(FlaskForm):
@@ -335,7 +335,22 @@ def login_admin():
 
 @app.route("/admin-dashboard")
 def admin_dashboard():
-        return render_template("admin/admin-dashboard.html")
+        num_users = User.query.all()
+        num_users = len(num_users)
+
+        num_teachers = Teacher.query.all()
+        num_teachers = len(num_teachers)
+
+        num_students = Student.query.all()
+        num_students = len(num_students)
+
+        num_topics = Topic.query.all()
+        num_topics = len(num_topics)
+
+        num_reflections = Reflection.query.all()
+        num_reflections = len(num_reflections)
+
+        return render_template("admin/admin-dashboard.html", num_users=num_users, num_teachers=num_teachers, num_students=num_students, num_topics=num_topics, num_reflections=num_reflections)
 
 @app.route("/admin-create-student", methods=['GET', 'POST'])
 def admin_create_student():
@@ -391,6 +406,51 @@ def admin_create_topic():
             db.session.commit()
             return redirect(url_for('admin_dashboard'))
         return render_template("admin/admin-create-topic.html", form=form)
+
+@app.route("/admin-view-users", methods=['GET', 'POST'])
+def admin_view_users():
+        users_list = []
+        users = User.query.all()
+
+        for user in users:
+            users_list.append(user)
+        return render_template("admin/admin-view-users.html", users_list=users_list)
+
+@app.route("/admin-view-teachers", methods=['GET', 'POST'])
+def admin_view_teachers():
+        teachers_list = []
+        teachers = User.query.filter_by(type="teacher").all()
+
+        for teacher in teachers:
+            teachers_list.append(teacher)
+        return render_template("admin/admin-view-teachers.html", teachers_list = teachers_list)
+
+@app.route("/admin-view-students", methods=['GET', 'POST'])
+def admin_view_students():
+        students_list = []
+        students = User.query.filter_by(type="student").all()
+        
+        for student in students:
+            students_list.append(student)
+        return render_template("admin/admin-view-students.html", students_list = students_list)
+
+@app.route("/admin-view-topics", methods=['GET', 'POST'])
+def admin_view_topics():
+        topics_list = []
+        topics = Topic.query.all()
+        
+        for topic in topics:
+            topics_list.append(topic)
+        return render_template("admin/admin-view-topics.html", topics_list = topics_list)
+
+@app.route("/admin-view-reflections", methods=['GET', 'POST'])
+def admin_view_reflections():
+        reflections_list = []
+        reflections = Reflection.query.all()
+        
+        for reflection in reflections:
+            reflections_list.append(reflection)
+        return render_template("admin/admin-view-reflections.html", reflections_list = reflections_list)
  
 
 # student routes------------------
@@ -570,8 +630,13 @@ def slides(slidesId):
 
 @app.route("/slides_list")
 def slides_list():
-    slidesList = Slides.query.all()      
-    return render_template('teacher/slides_list.html', slidesList = slidesList)
+    subject = request.args.get("subject")
+    email = session['email']
+    if subject:
+        slidesList = Slides.query.filter_by(slidesSubject=subject).all()
+    else:
+        slidesList = Slides.query.all()
+    return render_template('teacher/slides_list.html', slidesList = slidesList, email = email)
 
 @app.route("/account")
 def account():
@@ -580,7 +645,6 @@ def account():
 @app.route("/teacher-sentiments")
 def teacher_sentiments():
     subject = session['teacherSubject']
-    name = session['name']
     reflections_list=[]
     reflections = Reflection.query.all()
     for reflection in reflections:
@@ -588,7 +652,7 @@ def teacher_sentiments():
             reflections_list.append(reflection)
 
     sorted_reflection_list = sorted(reflections_list, key=lambda x: x.week)
-    return render_template('teacher/teacher-sentiments.html', sorted_reflection_list=sorted_reflection_list, name=name)
+    return render_template('teacher/teacher-sentiments.html', sorted_reflection_list=sorted_reflection_list)
 
 
 @app.route("/addSlides", methods=["GET", "POST"])
