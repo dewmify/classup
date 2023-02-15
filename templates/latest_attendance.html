@@ -71,41 +71,13 @@
 
     </div>
   </header>
+  <!-- End Header -->
 
   <main id="main">
-
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="page-header d-flex align-items-center" style="background-image: url('');">
-        <div class="container position-relative">
-          <div class="row d-flex justify-content-center">
-            <div class="col-lg-6 text-center">
-              <h2>Attendance taking</h2>
-              <p>Start the attendance taking process</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <nav>
-        <div class="container">
-          <ol>
-            <li><a href="/">Home</a></li>
-            <li>Take attendance</li>
-          </ol>
-        </div>
-      </nav>
-    </div><!-- End Breadcrumbs -->
-
     <section class="sample-page">
       <div class="container" data-aos="fade-up">
-        <p><h1 align="center">Processed Image</h1></p>
-          <div class="container">
-            <div class="row">
-              <img src="{{ url_for('display_image', filename=filename) }}" width="360" height="640">
-            </div>
-          </div>
-          <br>
-        <h2>Attendance for {{ subject }}</h2>
+
+        <h2>Latest Attendance for {{ subject }}</h2>
         <table class="table">
         <thead>
             <tr>
@@ -138,13 +110,7 @@
 
       </div>
     </section>
-      </div>
-    </section>
-    <section id="subjects" style="text-align: center;">
-      <button class="btn btn-primary btn-lg" style="background-color: #008374; display: inline-block; margin: 0 auto;">
-        <a href="/teacher_dashboard" style="color: white">Return to teacher's dashboard</a>
-      </button>
-    </section>
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->

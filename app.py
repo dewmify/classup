@@ -13,6 +13,7 @@ from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from keras_preprocessing.sequence import pad_sequences
+from flask import session
 
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -307,10 +308,10 @@ def login():
 def logout():
     session.pop('email', None)
     logout_user()
+    session.clear()
     return render_template("/index.html")
 
 # routes error handling
-
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -795,6 +796,7 @@ def process_attendance():
     processed_image_path = os.path.join(app.config['UPLOAD_FOLDER'], "processed_" + filename)
     cv2.imwrite(processed_image_path, img)
 
+    subject = session['teacherSubject']
     studentPresSubject = "studentPres" + str(session["teacherSubject"])
     for student in students:
         for name in names:
@@ -808,7 +810,21 @@ def process_attendance():
             present_students.append(student.name)
         else:
             non_present_students.append(student.name)
-    return render_template('attendance_result.html', filename="processed_" + filename, present_students=present_students, non_present_students=non_present_students)
+    return render_template('attendance_result.html', filename="processed_" + filename, present_students=present_students, non_present_students=non_present_students, subject=subject)
+
+@app.route("/latest_attendance")
+def latest_attendance():
+    subject = session['teacherSubject']
+    studentPresSubject = "studentPres" + str(subject)
+    students = Student.query.all()
+    present_students = []
+    non_present_students = []
+    for student in students:
+        if getattr(student, studentPresSubject) == 0:
+            present_students.append(student.name)
+        else:
+            non_present_students.append(student.name)
+    return render_template("latest_attendance.html", present_students=present_students, non_present_students=non_present_students, subject=subject)
 
 def onboarding(student_id):
     video_capture = cv2.VideoCapture(0)
@@ -839,16 +855,6 @@ def onboarding(student_id):
     print("Onboarding Image Captured")
 
 
-
-# @app.route('/onboarding/<int:student_id>', methods=["GET","POST"])
-# def onboard(student_id):
-#     student = Student.query.get(student_id)
-#     #form = onboardForm()
-#     #if form.validate_on_submit():
-#     onboarding(student_id)
-#     return render_template('onboarding.html', student=student)
-
-
 @app.route('/onboarding/<int:student_id>', methods=["GET","POST"])
 def onboard(student_id):
     student = Student.query.get(student_id)
@@ -857,17 +863,6 @@ def onboard(student_id):
         return render_template('onboarding.html', student=student, message='Onboarding process Finished')
     return render_template('onboarding.html', student=student)
     
-
-# @app.route("/onboarding", methods=["GET", "POST"])
-# def onboarding():
-#     if request.method == "GET":
-#         # Return the onboarding page
-#         return render_template("onboarding.html")
-#     else:
-#         # Start the onboarding process by running the onboarding script
-#         subprocess.run(["python", "onboarding.py"])
-        
-
 # max model
 def preprocess_input_data(sentence):
     tokenizer = transformers.BertTokenizer.from_pretrained("bert-base-cased")
