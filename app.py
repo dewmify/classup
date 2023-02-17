@@ -798,6 +798,13 @@ def process_attendance():
 
     subject = session['teacherSubject']
     studentPresSubject = "studentPres" + str(session["teacherSubject"])
+    
+     # Set all values for studentPresSubject to 1 for all students
+    for student in students:
+        setattr(student, studentPresSubject, 1)
+    db.session.commit()
+
+
     for student in students:
         for name in names:
             Name = getattr(student, 'name')
