@@ -1,4 +1,6 @@
 # classup
+## GitHub Clone link
+> https://github.com/dewmify/classup.git
 ## Joshua
 >AI Features
 ## Hand Gesture Recognition slides control
