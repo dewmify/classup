@@ -1,5 +1,24 @@
 # classup
 ## Joshua
+>AI Features
+## Hand Gesture Recognition slides control
+- CNN model used for image recognition. Two classes (right pointing and left pointing hand)
+- Dataset used for training of this model was compiled by myself, contains images of peoples hands pointing left and right, labelled as (left) and (right).
+Images contained people of differing race and age to reduce AI Bias. The images also went through data augmentation, such as random brightness changes as well as random zoom, random tilting of the images was not used since the direction of which the hand is pointing is very important.
+- On the slides page, the model predicts the webcam input every 5 seconds. 
+- The API ('/api/v1/handgesture' in app.py) is called in the javascript in slides.html, which will send the direction predicted as JSON.
+- The slides page will retrieve the response and control the slides depending on the direction (right = next slide, left = previous slide, no direction = stay on the same slide).
+- Unfortunately due to lack of an API to control the embedded OneDrive slides, the function to control the slides cannot change the slides, however, an indicator at the bottom shows which direction the slides should be changing to.
+
+> Other Features
+- MYSQL database set up with Amazon RDS
+- Teacher's Dashboard
+- Slides page
+- Create slides page to create the slides
+- Slides list page that displays all slides created, when slides title is clicked, will go to the corresponding slides page, also contains the edit and delete function.
+- Index pages/navbar
+- Fixing of the app routes
+- General fixes throughout the website
 
 ## Ryo
 > AI Features
