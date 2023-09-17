@@ -1,6 +1,10 @@
 # classup
 ## GitHub Clone link
 > https://github.com/dewmify/classup.git
+
+## Link to Google Slides
+> https://docs.google.com/presentation/d/1uLjIjI2xYooO209McjwdOi7VcuZOsnsDQXbLPifRBm0/edit?usp=sharing
+
 ## Joshua
 >AI Features
 ## Hand Gesture Recognition slides control
